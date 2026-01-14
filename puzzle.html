@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ココロの整理パズル - ブラスト</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .puzzle-body {
+            background: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            touch-action: none;
+        }
+
+        .grid-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            width: 90vw;
+            max-width: 350px;
+            margin: 20px auto;
+            background: #333;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: #444;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .cell.active {
+            background: #ffcc00;
+            box-shadow: 0 0 10px #ffcc00;
+        }
+
+        .piece-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #222;
+            margin-top: 20px;
+        }
+
+
+
+        /* ピース置き場の1つ1つの枠 */
+        .piece-item {
+            width: 80px;
+            height: 80px;
+            display: grid;
+            /* 5x5の細かい網目を作り、そこにブロックを置く */
+            grid-template-columns: repeat(5, 16px);
+            grid-template-rows: repeat(5, 16px);
+            justify-content: center;
+            align-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: grab;
+        }
+
+        /* ピースを構成する1つ1つの小ブロック */
+        .p-block {
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            /* ログポイントの色 */
+            border: 1px solid #000;
+            border-radius: 2px;
+        }
+
+        /* 置ける場所のプレビュー（薄い黄色） */
+        .cell.preview {
+            background: rgba(255, 204, 0, 0.4) !important;
+        }
+
+        /* 枠からはみ出したり重なったりして置けない時の警告（薄い赤） */
+        .cell.invalid {
+            background: rgba(255, 71, 87, 0.4) !important;
+        }
+
+        /* ピースの種類ごとの色設定（心の色をイメージ） */
+        .p-dot .p-block {
+            background: #ff7675;
+        }
+
+        /* 赤：情熱 */
+        .p-bar .p-block {
+            background: #74b9ff;
+        }
+
+        /* 青：冷静 */
+        .p-square .p-block {
+            background: #55efc4;
+        }
+
+        /* 緑：癒やし */
+        .p-L .p-block {
+            background: #a29bfe;
+        }
+
+        /* 紫：神秘 */
+        .p-T .p-block {
+            background: #ffeaa7;
+        }
+
+        /* 黄：希望 */
+        .p-BigSq .p-block {
+            background: #fd79a8;
+        }
+
+        /* 桃：愛 */
+
+        /* ドラッグ中のピースの状態 */
+        .piece-item.dragging {
+            cursor: grabbing;
+            /* 盤面のセルサイズ（約40px）に合わせるため拡大 */
+            /* 元の16pxから40pxにするには約2.5倍 */
+            transform: scale(2.5);
+            transform-origin: center center;
+            opacity: 0.9;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+        }
+
+        /* 盤面に置かれた時のブロックの見た目を共通化 */
+        .cell.active {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="puzzle-body">
+    <header class="header" style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-weight: bold; color: #ffcc00;">POPUZZLE</div>
+        <div style="font-size: 20px; background: #333; padding: 5px 15px; border-radius: 20px;">
+            Score: <span id="score">0</span>
+        </div>
+    </header>
+    <main>
+
+        <div id="grid" class="grid-board"></div>
+
+        <p>ピースを盤面にドラッグしてね</p>
+        <div class="piece-container" id="piece-dock">
+            <div id="p1" class="piece-item" draggable="true" ondragstart="onDragStart(event)">L字型</div>
+            <div id="p2" class="piece-item" draggable="true" ondragstart="onDragStart(event)">四角型</div>
+            <div id="p3" class="piece-item" draggable="true" ondragstart="onDragStart(event)">I字型</div>
+        </div>
+
+        <div id="game-over" class="modal">
+            <div class="modal-content" style="color:#000;">
+                <h2>置けなくなった！</h2>
+                <p>獲得スコアをポイントにしますか？</p>
+                <button class="btn-main" onclick="finishGame()">ポイントをもらって終了</button>
+                <button class="btn-save" onclick="location.reload()">📺 広告を見て復活</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+        <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
+        <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
+    </nav>
+    <script src="/js/blast-logic.js"></script>
+</body>
+
+</html>

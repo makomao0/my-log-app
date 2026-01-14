@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析 - カラダのログちゃん</title>
+    <link rel="stylesheet" href="./css/action-style.css">
+</head>
+
+<body>
+    <div class="analysis-section">
+        <div class="box">
+            <p class="label">あなたの傾向</p>
+            <h2 id="type-result">解析中...</h2>
+            <p id="advice-text"></p>
+            <button class="btn-solve" onclick="goToSolutions()">
+                💡 この悩みの解決策をもっと見る
+            </button>
+        </div>
+
+        <div class="heatmap-container">
+            <div class="body-mini">
+                <img src="imgs/home-icon-box-2.png" alt="body" width="100px">
+                <div id="heat-head" class="heat-spot"></div>
+                <div id="heat-stomach" class="heat-spot"></div>
+                <div id="heat-back" class="heat-spot"></div>
+            </div>
+            <div class="analysis-summary">
+                <p>今週の集中ダメージエリア</p>
+                <strong id="top-part-name">解析中...</strong>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <main>
+        <div class="board-header">
+            <h3>知恵袋：みんなの解決策</h3>
+            <div class="search-box">
+                <input type="text" id="keyword-search" placeholder="キーワードで検索（例：ストレッチ）" oninput="renderPosts()">
+            </div>
+            <div class="sort-options">
+                <select id="part-filter" onchange="renderPosts()">
+                    <option value="all">すべての部位</option>
+                    <option value="あたま">あたま</option>
+                    <option value="おなか">おなか</option>
+                    <option value="こし・せなか">こし</option>
+                </select>
+                <button onclick="changeSort('new')" id="sort-new" class="active">新着</button>
+                <button onclick="changeSort('popular')" id="sort-popular">人気</button>
+            </div>
+        </div>
+
+        <div id="post-list" class="post-list">
+        </div>
+
+        <button class="btn-post-fab" onclick="openModal()">＋</button>
+
+
+        <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <h3>✨ 知恵をシェアする</h3>
+                <p class="modal-sub">あなたの「これで楽になった！」を教えてね。</p>
+
+                <label for="post-part">部位</label>
+                <select id="post-part">
+                    <option value="あたま">あたま</option>
+                    <option value="むね">むね</option>
+                    <option value="おなか">おなか</option>
+                    <option value="うで">うで</option>
+                    <option value="あし">あし</option>
+                    <option value="こし・せなか">こし・せなか</option>
+                </select>
+
+                <label for="post-text">内容</label>
+                <textarea id="post-text" placeholder="例：20分おきに目を休めたら楽になったよ！"></textarea>
+
+                <div class="modal-buttons">
+                    <button class="btn-cancel" onclick="closeModal()">やめる</button>
+                    <button class="btn-submit" onclick="submitPost()">投稿する</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt="Home"></a>
+        <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt="Calendar"></a>
+        <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt="Game"></a>
+    </nav>
+
+    <script src="js/community.js"></script>
+    <script>
+        // ページ読み込み時に分析と描画を実行
+        window.onload = function () {
+            if (typeof renderAnalysis === 'function') renderAnalysis();
+            if (typeof renderPosts === 'function') renderPosts();
+        };
+    </script>
+</body>
+
+</html>

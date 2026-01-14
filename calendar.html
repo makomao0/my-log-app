@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダー - カラダのログちゃん</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/action-style.css">
+</head>
+
+<body>
+    <header class="header">
+        <h1>傾向カレンダー</h1>
+    </header>
+    <main>
+        <div class="container">
+            <div class="calendar-header">
+                <button onclick="changeMonth(-1)">◀</button>
+                <h2 id="current-month">2024年1月</h2>
+                <button onclick="changeMonth(1)">▶</button>
+            </div>
+            <div class="weekdays">
+                <div>日</div>
+                <div>月</div>
+                <div>火</div>
+                <div>水</div>
+                <div>木</div>
+                <div>金</div>
+                <div>土</div>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+        <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
+        <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
+    </nav>
+
+
+    <script src="/js/script.js"></script>
+    <script>
+        window.onload = renderCalendar;
+    </script>
+</body>
+
+</html>

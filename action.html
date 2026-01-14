@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>救急BOX - カラダのログちゃん</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <header class="action-body">
+        <img src="imgs/home-icon-box-1.png" alt="">
+    </header>
+
+    <div class="action-section">
+        <div class="action-grid">
+            <div class="action-item" onclick="showDetail('薬')"><img src="imgs/icons/1.png" alt=""><br>薬</div>
+            <div class="action-item" onclick="showDetail('病院')"><img src="imgs/icons/2.png" alt=""><br>病院</div>
+            <div class="action-item" onclick="showDetail('冷やす')"><img src="imgs/icons/3.png" alt=""><br>冷やす</div>
+            <div class="action-item" onclick="showDetail('温める')"><img src="imgs/icons/4.png" alt=""><br>温める</div>
+            <div class="action-item" onclick="showDetail('休む')"><img src="imgs/icons/5.png" alt=""><br>休む</div>
+            <div class="action-item" onclick="showDetail('水分')"><img src="imgs/icons/6.png" alt=""><br>水分</div>
+            <div class="action-item" onclick="showDetail('呼吸')"><img src="imgs/icons/7.png" alt=""><br>呼吸</div>
+            <div class="action-item" onclick="showDetail('食事')"><img src="imgs/icons/8.png" alt=""><br>食事</div>
+            <div class="action-item" onclick="showDetail('相談')"><img src="imgs/icons/9.png" alt=""><br>相談</div>
+        </div>
+
+    </div>
+
+    <div id="modal-detail" class="modal">
+        <div class="modal-content detail-card">
+            <h3 id="detail-title"></h3>
+            <p id="detail-text" style="text-align: left; padding: 10px; line-height: 1.6;"></p>
+            <button class="btn-main" onclick="closeDetail()">わかった！</button>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+        <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
+        <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
+    </nav>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
