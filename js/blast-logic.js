@@ -107,50 +107,63 @@ function onPointerDown(e) {
     if (!draggingPieceType) return;
     draggingPieceShape = PIECE_TYPES[draggingPieceType];
 
-    // --- 修正ポイント：サイズ取得を「scale(2.5)」にする前に行う ---
-    // もしすでにクラスがついている場合は一度外して計測する
+    // --- 修正ポイント1: 拡大前の「純粋なサイズ」を確実に取得する ---
     activePiece.classList.remove('dragging');
+    activePiece.style.transform = 'none';
     const rect = activePiece.getBoundingClientRect();
 
-    // 元のサイズの半分を基準点にする
+    // ピースの元のサイズの半分を保存
     startX = rect.width / 2;
     startY = rect.height / 2;
 
-    // ここでドラッグ開始のスタイルを適用
+    // --- 修正ポイント2: スタイルを適用 ---
     activePiece.classList.add('dragging');
     activePiece.style.position = 'fixed';
     activePiece.style.zIndex = '1000';
     activePiece.style.pointerEvents = 'none';
 
-    // スマホでのズレを防止するため、中心を軸に拡大することを明示
+    // 中心を基準に拡大することを保証
     activePiece.style.transformOrigin = 'center center';
-    activePiece.style.transform = 'translate(0, 0) scale(2.5)';
+    activePiece.style.transform = 'scale(2.5)';
 
+    // 初期位置を即座に計算
     moveAt(e.clientX, e.clientY);
 
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 }
 
+function moveAt(pageX, pageY) {
+    const scale = 2.5;
+
+    // ★ 修正ポイント3: 計算をシンプルにする
+    // 指（マウス）の座標から、拡大後のピースの半分(startX * scale)を引く
+    // これにより X座標は「真ん中」、Y座標は「真上」に固定されます
+    activePiece.style.left = (pageX - (startX * scale)) + 'px';
+    activePiece.style.top = (pageY - (startY * scale) - OFFSET_Y) + 'px';
+}
+
 
 const OFFSET_Y = 120; // 100px上に表示＆判定
-function moveAt(pageX, pageY) {
-    // 指のX座標(pageX)から、ピースの幅の半分(startX)を引くことで、横方向を真ん中に合わせる
-    activePiece.style.left = (pageX - startX) + 'px';
 
-    // 指のY座標(pageY)から、高さの半分(startY)を引いた上で、
-    // さらに OFFSET_Y 分だけマイナスすることで、真上にずらす
-    activePiece.style.top = (pageY - startY - OFFSET_Y) + 'px';
-}
 function onPointerMove(e) {
     if (!activePiece) return;
-    moveAt(e.clientX, e.clientY);
+
+    // ★スマホ対応：タッチイベントの場合は touches から座標を取得する
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    }
+
+    moveAt(clientX, clientY);
 
     clearPreviews();
 
-    // --- 2. 判定位置の修正 ---
-    // e.clientY（指の位置）ではなく、表示位置に合わせて OFFSET_Y 分上の要素を取得する
-    const elementBelow = document.elementFromPoint(e.clientX, e.clientY - OFFSET_Y);
+    // 判定位置も「表示位置（指の-100px上）」に合わせる
+    const elementBelow = document.elementFromPoint(clientX, clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
