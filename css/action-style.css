@@ -20,7 +20,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-image: url(../imgs/home-bg.png);
+ background-image: url(../imgs/home-bg.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -314,3 +314,4 @@ textarea {
     border: 2px solid #e1ff4d !important;
     z-index: 5;
 }
+
