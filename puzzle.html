@@ -133,13 +133,17 @@
         /* ドラッグ中のピースの状態 */
         .piece-item.dragging {
             cursor: grabbing;
-            /* 盤面のセルサイズ（約40px）に合わせるため拡大 */
-            /* 元の16pxから40pxにするには約2.5倍 */
             transform: scale(2.5);
             transform-origin: center center;
             opacity: 0.9;
             filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
-            transition: left 0.1s ease-out, top 0.1s ease-out;
+
+
+            /* --- 【修正】あらゆるtransitionを無効化 --- */
+            transition: none;
+            pointer-events: none;
+            z-index: 10000;
+            margin: 0 !important;
         }
 
         /* 盤面に置かれた時のブロックの見た目を共通化 */
