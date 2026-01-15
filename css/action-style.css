@@ -36,35 +36,96 @@ main {
 .nav-bar {
     position: fixed;
     bottom: 0;
+    left: 0;
+    /* 左端も指定すると安定します */
     width: 100%;
     display: flex;
     background: #55bbbf;
     z-index: 1000;
-}
-
-.nav-item {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    background: none;
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    align-items: center;
+    height: 100px;
+    /* 130px から 80px 程度に縮小 */
+    justify-content: center;
 }
 
 .nav-item img {
     width: 100px;
+    /* 100px から 50px 程度に縮小 */
     height: auto;
+}
 
+.nav-item {
+    flex: 1;
+    text-align: center;
+    /* パディングも調整 */
+    font-size: 10px;
 }
 
 .nav-bar :hover {
     background: var(--accent);
     transform: scale(1.01);
     transition: 0.5s;
+}
+
+/* カレンダー画面専用の調整 */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px;
+
+    /* 重要：ナビゲーション(100px)＋少しの余裕(20px)を下に確保 */
+    margin-bottom: 120px;
+
+    /* 画面からはみ出さないよう、高さを自動調整 */
+    max-height: calc(100vh - 250px);
+    overflow: hidden;
+    /* 万が一入り切らない場合はこの中だけスクロール可能に */
+}
+
+.cal-day {
+    aspect-ratio: 1 /1;
+    /* 正方形にする */
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.cal-day.active {
+    background-color: #fff9e6;
+    /* 記録がある日 */
+    border-color: #ffd700;
+}
+
+.cal-day.today {
+    outline: 2px solid #ff6b6b;
+    /* 今日を強調 */
+}
+
+.cal-day.empty {
+    background: none;
+    border: none;
+}
+
+/* カレンダー */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
 }
 
 
