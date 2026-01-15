@@ -32,15 +32,6 @@ body {
 }
 
 /* アクション画面のメイン部分に余白を追加 */
-.action-body {
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* 下記を追加：ナビの高さ(130px) + 少しの余裕(20px) */
-    padding-bottom: 150px;
-}
-
 
 
 
@@ -442,6 +433,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 40px;
 }
 
 .action-body img {
