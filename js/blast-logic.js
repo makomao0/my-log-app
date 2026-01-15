@@ -149,28 +149,42 @@ const OFFSET_Y = 120; // 100px上に表示＆判定
 function onPointerMove(e) {
     if (!activePiece) return;
 
-    // ★スマホ対応：タッチイベントの場合は touches から座標を取得する
+    // 1. 基本の座標取得（スマホ対応含む）
     let clientX = e.clientX;
     let clientY = e.clientY;
-
     if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
     }
 
-    moveAt(clientX, clientY);
-
     clearPreviews();
 
-    // 判定位置も「表示位置（指の-100px上）」に合わせる
+    // 判定位置（指の -OFFSET_Y 上）にあるセルを取得
     const elementBelow = document.elementFromPoint(clientX, clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
         const [_, r, c] = cell.id.split('-').map(Number);
-        updatePreview(r, c);
+
+        // --- ★ 吸い付き（スナップ）機能の追加 ---
+        if (canPlace(draggingPieceShape, r, c)) {
+            // 置ける場所なら、そのセルの「中心座標」を取得してそこにピースを吸い付かせる
+            const cellRect = cell.getBoundingClientRect();
+            const scale = 2.5;
+
+            // セルの中心にピースの中心が来るように座標を上書き
+            activePiece.style.left = (cellRect.left + cellRect.width / 2 - (startX * scale)) + 'px';
+            activePiece.style.top = (cellRect.top + cellRect.height / 2 - (startY * scale)) + 'px';
+
+            updatePreview(r, c); // プレビューを表示
+            return; // ここで終了（通常の moveAt は実行しない）
+        }
     }
+
+    // 置けない場所や盤面外なら、通常通り指に追従させる
+    moveAt(clientX, clientY);
 }
+
 
 function updatePreview(r, c) {
     if (!draggingPieceShape) return;
