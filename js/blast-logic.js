@@ -107,32 +107,32 @@ function onPointerDown(e) {
     if (!draggingPieceType) return;
     draggingPieceShape = PIECE_TYPES[draggingPieceType];
 
-    // --- 修正ポイント1: 拡大前の「純粋なサイズ」を確実に取得する ---
+    // --- 【重要】サイズ計測の前に一旦スタイルをリセットして正確に測る ---
     activePiece.classList.remove('dragging');
     activePiece.style.transform = 'none';
     const rect = activePiece.getBoundingClientRect();
 
-    // ピースの元のサイズの半分を保存
+    // 元のサイズ（1倍）の半分を基準にする
     startX = rect.width / 2;
     startY = rect.height / 2;
 
-    // --- 修正ポイント2: スタイルを適用 ---
+    // ドラッグ開始のスタイル適用
     activePiece.classList.add('dragging');
     activePiece.style.position = 'fixed';
-    activePiece.style.zIndex = '1000';
+    activePiece.style.zIndex = '9999';
     activePiece.style.pointerEvents = 'none';
-
-    // 中心を基準に拡大することを保証
     activePiece.style.transformOrigin = 'center center';
-    activePiece.style.transform = 'scale(2.5)';
+    activePiece.style.transform = 'scale(2.5)'; // ここで拡大
 
-    // 初期位置を即座に計算
-    moveAt(e.clientX, e.clientY);
+    // 指/マウスの現在地を取得
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    moveAt(clientX, clientY);
 
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 }
-
 function moveAt(pageX, pageY) {
     const scale = 2.5;
 
@@ -149,42 +149,35 @@ const OFFSET_Y = 120; // 100px上に表示＆判定
 function onPointerMove(e) {
     if (!activePiece) return;
 
-    // 1. 基本の座標取得（スマホ対応含む）
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-    if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    }
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    const scale = 2.5; // CSSのscaleと同じ値
 
     clearPreviews();
 
-    // 判定位置（指の -OFFSET_Y 上）にあるセルを取得
+    // 判定位置（指の -OFFSET_Y 上）
     const elementBelow = document.elementFromPoint(clientX, clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
         const [_, r, c] = cell.id.split('-').map(Number);
-
-        // --- ★ 吸い付き（スナップ）機能の追加 ---
         if (canPlace(draggingPieceShape, r, c)) {
-            // 置ける場所なら、そのセルの「中心座標」を取得してそこにピースを吸い付かせる
             const cellRect = cell.getBoundingClientRect();
-            const scale = 2.5;
 
-            // セルの中心にピースの中心が来るように座標を上書き
+            // 【吸い付き】セルの中心から「拡大後のピースの半径」を引いて配置
             activePiece.style.left = (cellRect.left + cellRect.width / 2 - (startX * scale)) + 'px';
             activePiece.style.top = (cellRect.top + cellRect.height / 2 - (startY * scale)) + 'px';
 
-            updatePreview(r, c); // プレビューを表示
-            return; // ここで終了（通常の moveAt は実行しない）
+            updatePreview(r, c);
+            return;
         }
     }
 
-    // 置けない場所や盤面外なら、通常通り指に追従させる
-    moveAt(clientX, clientY);
+    // 【通常追従】指の真上に「拡大後のピースの中心」がくるように計算
+    // これで斜めにズレることはなくなります
+    activePiece.style.left = (clientX - (startX * scale)) + 'px';
+    activePiece.style.top = (clientY - (startY * scale) - OFFSET_Y) + 'px';
 }
-
 
 function updatePreview(r, c) {
     if (!draggingPieceShape) return;
