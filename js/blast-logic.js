@@ -107,29 +107,32 @@ function onPointerDown(e) {
     if (!draggingPieceType) return;
     draggingPieceShape = PIECE_TYPES[draggingPieceType];
 
-    // --- 修正ポイント1: サイズ取得を先に行う、または固定値にする ---
-    // scale(2.5)がかかる前の元のサイズを基準にするのが最もズレません
+    // --- 修正ポイント：サイズ取得を「scale(2.5)」にする前に行う ---
+    // もしすでにクラスがついている場合は一度外して計測する
+    activePiece.classList.remove('dragging');
     const rect = activePiece.getBoundingClientRect();
+
+    // 元のサイズの半分を基準点にする
     startX = rect.width / 2;
     startY = rect.height / 2;
 
-    // ドラッグ中クラスを追加（scale(2.5)などはCSS側で管理）
+    // ここでドラッグ開始のスタイルを適用
     activePiece.classList.add('dragging');
-
-    // --- 修正ポイント2: transform の干渉を防ぐ ---
-    // ここで translate(0,0) を指定し、moveAt で座標を直接指定します
-    activePiece.style.transform = 'translate(0, 0) scale(2.5)';
-    activePiece.style.transformOrigin = 'center center'; // 中心を軸に拡大
-
     activePiece.style.position = 'fixed';
     activePiece.style.zIndex = '1000';
     activePiece.style.pointerEvents = 'none';
+
+    // スマホでのズレを防止するため、中心を軸に拡大することを明示
+    activePiece.style.transformOrigin = 'center center';
+    activePiece.style.transform = 'translate(0, 0) scale(2.5)';
 
     moveAt(e.clientX, e.clientY);
 
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 }
+
+
 const OFFSET_Y = 120; // 100px上に表示＆判定
 function moveAt(pageX, pageY) {
     // 指のX座標(pageX)から、ピースの幅の半分(startX)を引くことで、横方向を真ん中に合わせる
