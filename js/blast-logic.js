@@ -98,7 +98,13 @@ function setupPointerEvents() {
     });
 }
 
+
+
+
 function onPointerDown(e) {
+    // 指やマウスのデフォルト挙動を防止
+    if (e.cancelable) e.preventDefault();
+
     activePiece = e.currentTarget;
     currentDockId = activePiece.id;
     const pieceIdx = parseInt(currentDockId.replace('p', '')) - 1;
@@ -107,82 +113,85 @@ function onPointerDown(e) {
     if (!draggingPieceType) return;
     draggingPieceShape = PIECE_TYPES[draggingPieceType];
 
-    // --- 修正ポイント1: 拡大前の「純粋なサイズ」を確実に取得する ---
+    // --- 【修正】一度強制的にリセットして正確な元のサイズを測る ---
     activePiece.classList.remove('dragging');
     activePiece.style.transform = 'none';
-    const rect = activePiece.getBoundingClientRect();
+    activePiece.style.transition = 'none';
 
-    // ピースの元のサイズの半分を保存
+    // getBoundingClientRectは1倍の状態のサイズを返す
+    const rect = activePiece.getBoundingClientRect();
     startX = rect.width / 2;
     startY = rect.height / 2;
 
-    // --- 修正ポイント2: スタイルを適用 ---
+    // ドラッグ用スタイル適用
     activePiece.classList.add('dragging');
     activePiece.style.position = 'fixed';
-    activePiece.style.zIndex = '1000';
+    activePiece.style.zIndex = '10000';
     activePiece.style.pointerEvents = 'none';
 
-    // 中心を基準に拡大することを保証
+    // 中心軸を固定して2.5倍に
     activePiece.style.transformOrigin = 'center center';
     activePiece.style.transform = 'scale(2.5)';
 
-    // 初期位置を即座に計算
+    // 初期座標の即時反映
     moveAt(e.clientX, e.clientY);
 
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
+    // スマホ特有のカクつきを防ぐため、オプションで passive: false を指定
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp, { passive: false });
 }
+
+const OFFSET_Y = 120; // 浮かせる高さ
 
 function moveAt(pageX, pageY) {
-    const scale = 2.5;
-
-    // ★ 修正ポイント3: 計算をシンプルにする
-    // 指（マウス）の座標から、拡大後のピースの半分(startX * scale)を引く
-    // これにより X座標は「真ん中」、Y座標は「真上」に固定されます
-    activePiece.style.left = (pageX - (startX * scale)) + 'px';
-    activePiece.style.top = (pageY - (startY * scale) - OFFSET_Y) + 'px';
+    // ピースの「中心(startX/startY)」をマウス位置(pageX/pageY)に合わせる
+    // transform-origin: center center なので、scaleに関係なくこれで中心が合います
+    activePiece.style.left = (pageX - startX) + 'px';
+    activePiece.style.top = (pageY - startY - OFFSET_Y) + 'px';
 }
-
-
-const OFFSET_Y = 120; // 100px上に表示＆判定
+let isSnapping = false; // 吸い付き中かどうかのフラグ
 
 function onPointerMove(e) {
     if (!activePiece) return;
+    if (e.cancelable) e.preventDefault();
 
-    // 1. 基本の座標取得（スマホ対応含む）
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-    if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    }
+    const clientX = e.clientX;
+    const clientY = e.clientY;
 
     clearPreviews();
 
-    // 判定位置（指の -OFFSET_Y 上）にあるセルを取得
     const elementBelow = document.elementFromPoint(clientX, clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
         const [_, r, c] = cell.id.split('-').map(Number);
-
-        // --- ★ 吸い付き（スナップ）機能の追加 ---
         if (canPlace(draggingPieceShape, r, c)) {
-            // 置ける場所なら、そのセルの「中心座標」を取得してそこにピースを吸い付かせる
             const cellRect = cell.getBoundingClientRect();
-            const scale = 2.5;
 
-            // セルの中心にピースの中心が来るように座標を上書き
-            activePiece.style.left = (cellRect.left + cellRect.width / 2 - (startX * scale)) + 'px';
-            activePiece.style.top = (cellRect.top + cellRect.height / 2 - (startY * scale)) + 'px';
+            // --- ★ 吸い付きモードの処理 ---
+            if (!isSnapping) {
+                // 吸い付く瞬間だけ、少しだけ滑らかにする（カクつき防止）
+                activePiece.style.transition = 'left 0.1s ease-out, top 0.1s ease-out';
+                isSnapping = true;
+            }
 
-            updatePreview(r, c); // プレビューを表示
-            return; // ここで終了（通常の moveAt は実行しない）
+            activePiece.style.left = (cellRect.left + cellRect.width / 2 - startX) + 'px';
+            activePiece.style.top = (cellRect.top + cellRect.height / 2 - startY) + 'px';
+
+            updatePreview(r, c);
+            return;
         }
     }
 
-    // 置けない場所や盤面外なら、通常通り指に追従させる
-    moveAt(clientX, clientY);
+    // --- ★ 通常追従モードの処理 ---
+    if (isSnapping) {
+        // 吸い付きが外れたら、即座にtransitionを切って指に密着させる
+        activePiece.style.transition = 'none';
+        isSnapping = false;
+    }
+
+    activePiece.style.left = (clientX - startX) + 'px';
+    activePiece.style.top = (clientY - startY - OFFSET_Y) + 'px';
 }
 function updatePreview(r, c) {
     if (!draggingPieceShape) return;
