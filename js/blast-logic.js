@@ -107,13 +107,19 @@ function onPointerDown(e) {
     if (!draggingPieceType) return;
     draggingPieceShape = PIECE_TYPES[draggingPieceType];
 
-    // ドラッグ中クラスを追加してスケールアップ
-    activePiece.classList.add('dragging');
-
+    // --- 修正ポイント1: サイズ取得を先に行う、または固定値にする ---
+    // scale(2.5)がかかる前の元のサイズを基準にするのが最もズレません
     const rect = activePiece.getBoundingClientRect();
-    // スケールが変わるため、中心点を固定して計算
     startX = rect.width / 2;
     startY = rect.height / 2;
+
+    // ドラッグ中クラスを追加（scale(2.5)などはCSS側で管理）
+    activePiece.classList.add('dragging');
+
+    // --- 修正ポイント2: transform の干渉を防ぐ ---
+    // ここで translate(0,0) を指定し、moveAt で座標を直接指定します
+    activePiece.style.transform = 'translate(0, 0) scale(2.5)';
+    activePiece.style.transformOrigin = 'center center'; // 中心を軸に拡大
 
     activePiece.style.position = 'fixed';
     activePiece.style.zIndex = '1000';
@@ -124,19 +130,24 @@ function onPointerDown(e) {
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 }
-
+const OFFSET_Y = 120; // 100px上に表示＆判定
 function moveAt(pageX, pageY) {
-    // 指より少し上（-80px）に表示して見やすくする
+    // 指のX座標(pageX)から、ピースの幅の半分(startX)を引くことで、横方向を真ん中に合わせる
     activePiece.style.left = (pageX - startX) + 'px';
-    activePiece.style.top = (pageY - startY - 80) + 'px';
-}
 
+    // 指のY座標(pageY)から、高さの半分(startY)を引いた上で、
+    // さらに OFFSET_Y 分だけマイナスすることで、真上にずらす
+    activePiece.style.top = (pageY - startY - OFFSET_Y) + 'px';
+}
 function onPointerMove(e) {
     if (!activePiece) return;
     moveAt(e.clientX, e.clientY);
 
     clearPreviews();
-    const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+
+    // --- 2. 判定位置の修正 ---
+    // e.clientY（指の位置）ではなく、表示位置に合わせて OFFSET_Y 分上の要素を取得する
+    const elementBelow = document.elementFromPoint(e.clientX, e.clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
@@ -162,7 +173,8 @@ function updatePreview(r, c) {
 function onPointerUp(e) {
     if (!activePiece) return;
 
-    const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+    // --- 3. 離した時の判定位置も修正 ---
+    const elementBelow = document.elementFromPoint(e.clientX, e.clientY - OFFSET_Y);
     const cell = elementBelow ? elementBelow.closest('.cell') : null;
 
     if (cell) {
