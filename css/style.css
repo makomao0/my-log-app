@@ -25,7 +25,7 @@ body {
     /* 背景設定などはそのまま */
     margin: 0;
     padding: 0;
-    background-image: url(/imgs/home-bg.png);
+    background-image: url(../imgs/home-bg.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -188,11 +188,14 @@ body {
     margin-bottom: 5px;
 }
 
+/* カレンダー画面専用の調整 */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* 7列固定 */
     gap: 5px;
+    /* 画面の高さに合わせて、溢れたらこの中だけでスクロールさせる */
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
 }
 
 .cal-day {
