@@ -12,19 +12,31 @@
             color: #fff;
             text-align: center;
             touch-action: none;
+            overflow: hidden;
+            /* スクロール禁止 */
+            height: 100vh;
+            /* 画面ぴったり */
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
+
+
 
         .grid-board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             gap: 4px;
-            width: 90vw;
-            max-width: 350px;
-            margin: 20px auto;
+            width: 85vw;
+            /* 画面幅の85% */
+            max-width: 320px;
+            /* 最大サイズを少し抑える */
             background: #333;
             padding: 8px;
             border-radius: 8px;
+            margin: 10px auto;
         }
+
 
         .cell {
             aspect-ratio: 1;
@@ -41,17 +53,18 @@
         .piece-container {
             display: flex;
             justify-content: space-around;
-            padding: 20px;
-            background: #222;
-            margin-top: 20px;
+            width: 100%;
+            padding: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            margin-top: 5px;
         }
 
 
 
         /* ピース置き場の1つ1つの枠 */
         .piece-item {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             display: grid;
             /* 5x5の細かい網目を作り、そこにブロックを置く */
             grid-template-columns: repeat(5, 16px);
@@ -141,11 +154,10 @@
             Score: <span id="score">0</span>
         </div>
     </header>
-    <main>
 
+    <main>
         <div id="grid" class="grid-board"></div>
 
-        <p>ピースを盤面にドラッグしてね</p>
         <div class="piece-container" id="piece-dock">
             <div id="p1" class="piece-item" draggable="true" ondragstart="onDragStart(event)">L字型</div>
             <div id="p2" class="piece-item" draggable="true" ondragstart="onDragStart(event)">四角型</div>
@@ -162,14 +174,15 @@
         </div>
     </main>
 
-    <nav class="nav-bar">
-        <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
-        <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
-        <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
-    </nav>
-    <script src="./js/blast-logic.js"></script>
+    <footer>
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+            <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
+            <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
+        </nav>
+    </footer>
+
+    <script src="js/blast-logic.js"></script>
 </body>
 
-
 </html>
-
