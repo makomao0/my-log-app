@@ -130,7 +130,7 @@ function onPointerDown(e) {
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 }
-const OFFSET_Y = -120; // 100px上に表示＆判定
+const OFFSET_Y = 120; // 100px上に表示＆判定
 function moveAt(pageX, pageY) {
     // 指のX座標(pageX)から、ピースの幅の半分(startX)を引くことで、横方向を真ん中に合わせる
     activePiece.style.left = (pageX - startX) + 'px';
@@ -289,4 +289,5 @@ function checkGameOver() {
 }
 
 initGrid();
+
 
