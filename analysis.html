@@ -45,8 +45,12 @@
                 <select id="part-filter" onchange="renderPosts()">
                     <option value="all">すべての部位</option>
                     <option value="あたま">あたま</option>
+                    <option value="むね">むね</option>
                     <option value="おなか">おなか</option>
-                    <option value="こし・せなか">こし</option>
+                    <option value="ひだりうで">ひだりうで</option>
+                    <option value="みぎうで">みぎうで</option>
+                    <option value="こし・せなか">こし・せなか</option>
+                    <option value="あし">あし</option>
                 </select>
                 <button onclick="changeSort('new')" id="sort-new" class="active">新着</button>
                 <button onclick="changeSort('popular')" id="sort-popular">人気</button>
@@ -93,6 +97,7 @@
         </nav>
     </footer>
 
+    <script src="js/script.js"></script>
     <script src="js/community.js"></script>
     <script>
         // ページ読み込み時に分析と描画を実行
