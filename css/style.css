@@ -209,12 +209,18 @@ body {
     cursor: pointer;
     border-radius: 12px;
     width: 100px;
+
+
+
 }
 
 .action-item img {
     width: 50px;
     height: auto;
+
 }
+
+
 
 .detail-card {
     margin-top: 30%;
@@ -287,84 +293,131 @@ body {
 
 }
 
+/* 人体マップの各タップエリア設定 */
 
-/* 人体マップのベース */
 .body-canvas {
     position: relative;
     width: 100%;
-    /* 100vh(画面全体) - 100px(ナビ) - 160px(ヘッダー等) で計算 */
-    /* ヘッダーの高さに合わせて 160px の部分は微調整してください */
-    height: calc(100vh - 100px - 300px);
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    user-select: none;
-
-    /* ナビに被らないよう、下にナビと同じ高さの余白を作る */
-    margin-bottom: 100px;
+    max-width: 250px;
+    /* シルエットの大きさに合わせる */
+    margin: 0 auto;
+    margin-bottom: 130px;
+    /* ナビゲーションバーの高さ分の余白を確保 */
 }
 
-.body-outline-char {
-    /* 180px から 画面の高さの35% (35vh) などに変更 */
-    /* これにより、画面が短くなるとキャラクターも自動で小さくなります */
-    font-size: 35vh;
-    user-select: none;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.body-silhouette {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* 透明な判定エリアの共通設定 */
+/* タップエリアの共通設定 */
 .touch-area {
     position: absolute;
-    /* 開発中に範囲を確認したい場合は background: rgba(255,0,0,0.1); にしてください */
-    background: rgba(0, 0, 0, 0);
+    background: rgba(0, 115, 255, 0.047);
+    /* うっすらオレンジ色で見えるようにする */
+    border: 1px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
     cursor: pointer;
-    z-index: 10;
+    transition: background 0.2s;
 }
 
-/* 各部位の位置調整（🧍‍♀️のサイズに合わせて微調整してください） */
+/* タップした瞬間のエフェクト */
+.touch-area:active {
+    background: rgba(255, 0, 0, 0.6) !important;
+    transform: scale(1.1);
+}
+
+/* 各部位の配置（画像に合わせて調整してください） */
 .area-head {
-    top: 10%;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    top: 2%;
+    left: 35%;
+    width: 30%;
+    height: 15%;
+}
+
+.area-neck {
+    top: 17%;
+    left: 40%;
+    width: 20%;
+    height: 5%;
+}
+
+.area-shoulder-l {
+    top: 20%;
+    left: 20%;
+    width: 15%;
+    height: 10%;
+}
+
+.area-shoulder-r {
+    top: 20%;
+    left: 65%;
+    width: 15%;
+    height: 10%;
 }
 
 .area-chest {
     top: 25%;
-    width: 80px;
-    height: 60px;
+    left: 35%;
+    width: 30%;
+    height: 12%;
 }
 
 .area-stomach {
-    top: 40%;
-    width: 80px;
-    height: 70px;
+    top: 38%;
+    left: 35%;
+    width: 30%;
+    height: 15%;
 }
 
 .area-arm-l {
     top: 30%;
-    left: 25%;
-    width: 50px;
-    height: 120px;
+    left: 10%;
+    width: 12%;
+    height: 25%;
 }
 
 .area-arm-r {
     top: 30%;
-    right: 25%;
-    width: 50px;
-    height: 120px;
+    left: 78%;
+    width: 12%;
+    height: 25%;
 }
 
-.area-leg {
-    top: 60%;
-    width: 100px;
-    height: 140px;
+.area-hand-l {
+    top: 55%;
+    left: 5%;
+    width: 12%;
+    height: 10%;
 }
+
+.area-hand-r {
+    top: 55%;
+    left: 83%;
+    width: 12%;
+    height: 10%;
+}
+
+.area-leg-l {
+    top: 55%;
+    left: 25%;
+    width: 20%;
+    height: 40%;
+}
+
+.area-leg-r {
+    top: 55%;
+    left: 55%;
+    width: 20%;
+    height: 40%;
+}
+
 
 /* 選択マーカー（タップした場所に出るピン） */
 .selection-marker {
@@ -402,11 +455,57 @@ body {
 }
 
 /* 分析画面のヒートスポット */
+/* ヒートマップのコンテナ */
+.heatmap-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 15px;
+    margin-top: 10px;
+}
+
+.body-mini {
+    position: relative;
+    /* これが重要：スポットの基準点になる */
+    width: 100px;
+}
+
 .heat-spot {
     position: absolute;
-    background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(255, 0, 0, 0) 70%);
+    width: 25px;
+    /* 少し大きくすると見やすい */
+    height: 25px;
     border-radius: 50%;
     pointer-events: none;
+    filter: blur(3px);
+    /* じわっと光らせる */
+    z-index: 5;
+}
+
+/* 位置の微調整（画像に合わせて調整してください） */
+#heat-head {
+    top: 5%;
+    left: 35%;
+}
+
+#heat-stomach {
+    top: 40%;
+    left: 35%;
+}
+
+#heat-back {
+    top: 60%;
+    left: 35%;
+}
+
+
+
+.body-mini {
+    position: relative;
+    /* スポットを画像の上に重ねる基準 */
+    display: inline-block;
 }
 
 /* 各部位の光の位置を🧍‍♀️に合わせる */
