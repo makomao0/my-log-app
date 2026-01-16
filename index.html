@@ -22,6 +22,8 @@
             <span id="face" class="face-display"><img src="imgs/icons/16.png" alt="" width="100px"></span>
         </div>
         <div class="top-items">
+            <a href="history.html" class="icon-box" style="text-decoration: none; color: inherit;"><img
+                    src="imgs/home-icon-box-1-or.png" alt=""></a>
             <a href="action.html" class="icon-box" style="text-decoration: none; color: inherit;"><img
                     src="imgs/home-icon-box-1-or.png" alt=""></a>
             <a href="analysis.html" class="icon-box"
@@ -34,16 +36,22 @@
     </header>
     <main>
         <div>
-            <div class="body-canvas">
-                <span class="body-outline-char"><img src="imgs/top-silhouette-icon.png" alt="" height="265px"
+            <div id="face" class="body-canvas">
+                <span class="body-outline-char"><img src="imgs/top-silhouette-icon.png" alt="" height="350px"
                         width="100%" style="display: flex; justify-content: center;"></span>
 
-                <div class="touch-area area-head" onclick="countUpAtLocation('あたま', event)"></div>
-                <div class="touch-area area-chest" onclick="countUpAtLocation('むね', event)"></div>
-                <div class="touch-area area-stomach" onclick="countUpAtLocation('おなか', event)"></div>
+                <div class="touch-area area-head" onclick="countUpAtLocation('あたま', event)"><span>あたま</span></div>
+                <div class="touch-area area-neck" onclick="countUpAtLocation('くび', event)"><span>くび</span></div>
+                <div class="touch-area area-shoulder-l" onclick="countUpAtLocation('ひだりかた', event)"></div>
+                <div class="touch-area area-shoulder-r" onclick="countUpAtLocation('みぎかた', event)"></div>
+                <div class="touch-area area-chest" onclick="countUpAtLocation('むね', event)"><span>むね</span></div>
+                <div class="touch-area area-stomach" onclick="countUpAtLocation('おなか', event)"><span>おなか</span></div>
                 <div class="touch-area area-arm-l" onclick="countUpAtLocation('ひだりうで', event)"></div>
                 <div class="touch-area area-arm-r" onclick="countUpAtLocation('みぎうで', event)"></div>
-                <div class="touch-area area-leg" onclick="countUpAtLocation('あし', event)"></div>
+                <div class="touch-area area-hand-l" onclick="countUpAtLocation('ひだりて', event)"></div>
+                <div class="touch-area area-hand-r" onclick="countUpAtLocation('みぎて', event)"></div>
+                <div class="touch-area area-leg-l" onclick="countUpAtLocation('ひだりあし', event)"><span>あし</span></div>
+                <div class="touch-area area-leg-r" onclick="countUpAtLocation('みぎあし', event)"></div>
             </div>
 
             <script>
