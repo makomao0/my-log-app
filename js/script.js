@@ -10,6 +10,7 @@ let currentTopPart = "all"; // 現在の分析で一番痛い部位
 
 // アドバイスと病院検索のデータベース
 const HEALTH_DATABASE = {
+    // --- 既存の項目 ---
     'あたま': {
         title: '緊張型頭痛（かも？）',
         text: '首や肩のコリ、ストレスが原因かもしれません。目を休めて温めてみて。',
@@ -25,15 +26,41 @@ const HEALTH_DATABASE = {
         text: '同じ姿勢が続いていませんか？軽いストレッチが効果的です。',
         search: '近くの整形外科'
     },
-    '薬': { title: 'お薬のアドバイス', text: '用法用量を守って飲みましょう。お薬手帳を忘れずに。', search: '近くの薬局' },
-    '病院': { title: '受診の目安', text: '強い痛みが続く場合は、我慢せず医師に相談してください。', search: '近くの総合病院' },
-    '冷やす': { title: '冷やす', text: 'ズキズキ痛む時や熱がある時は、タオル越しに冷やして。' },
-    '温める': { title: '温める', text: 'お腹の痛みや、慢性的なコリは温めると楽になります。' },
-    '休む': { title: '休む', text: '一番の薬は睡眠です。スマホを置いてゆっくり休みましょう。' },
-    '水分': { title: '水分補給', text: 'こまめに少しずつ、常温の水を飲みましょう。' },
-    '呼吸': { title: 'リラックス呼吸', text: '鼻から吸って口から吐く。5回繰り返すと落ち着くよ。' },
-    '食事': { title: '食事のアドバイス', text: '消化に良いものを選び、刺激物は控えましょう。' },
-    '相談': { title: '相談しよう', text: '一人で悩まず、信頼できる人にこのログを見せてみて。' }
+
+    // --- 新しく追加する項目 ---
+    'みみ': {
+        title: '耳の違和感（かも？）',
+        text: '耳鳴りや詰まった感じはありませんか？気圧の変化や疲れでも起こります。',
+        search: '近くの耳鼻咽喉科'
+    },
+    'みぎみみ': { title: '右耳の違和感', text: '耳を触りすぎていませんか？静かな場所で休みましょう。', search: '近くの耳鼻咽喉科' },
+    'ひだりみみ': { title: '左耳の違和感', text: '疲れが溜まっているサインかも。ゆっくり耳の周りをほぐして。', search: '近くの耳鼻咽喉科' },
+
+    'くび': {
+        title: '首のコリ・痛み（かも？）',
+        text: 'スマホを長時間見ていませんか？「ストレートネック」に注意。',
+        search: '近くの整形外科'
+    },
+    'むね': {
+        title: '胸の痛み・動悸（かも？）',
+        text: 'チクチク、ズキズキする場合は、ストレスや胃酸の逆流の可能性も。',
+        search: '近くの循環器内科 内科'
+    },
+    'うで': {
+        title: '腕のだるさ・疲れ（かも？）',
+        text: 'キーボード操作や重い荷物で筋肉が張っています。手首を回して。',
+        search: '近くの整形外科'
+    },
+    'みぎうで': { title: '右腕の疲れ', text: '利き腕の使いすぎかもしれません。', search: '近くの整形外科' },
+    'ひだりうで': { title: '左腕の疲れ', text: '無理な姿勢で寝ていませんでしたか？', search: '近くの整形外科' },
+
+    'あし': {
+        title: '足の疲れ・むくみ（かも？）',
+        text: '立ち仕事や歩きすぎが原因かも。足首を回したり、高くして寝てみて。',
+        search: '近くの整形外科'
+    },
+    'みぎあし': { title: '右足の疲れ', text: '重心が右に偏っているかもしれません。', search: '近くの整形外科' },
+    'ひだりあし': { title: '左足の疲れ', text: 'ストレッチで血行を良くしましょう。', search: '近くの整形外科' },
 };
 
 // ==========================================
@@ -89,6 +116,8 @@ function goToSolutions() {
     }
 }
 
+
+
 // ==========================================
 // 3. 知恵袋機能（analysis.html / community.html用）
 // ==========================================
@@ -112,32 +141,106 @@ function renderPosts() {
     `).join('') || '<p style="text-align:center; padding:20px;">まだ投稿がありません。</p>';
 }
 
+
+
+
+
+
+
 // ==========================================
 // 4. アクション・詳細表示（action.html用）
 // ==========================================
+
+
+const MEDICAL_GUIDE = {
+    '薬': {
+        title: 'お薬のアドバイス',
+        text: '用法用量を守って飲みましょう。お薬手帳を持って医師に相談するのが一番安心です。',
+        search: '近くのドラッグストア'
+    },
+    '病院': {
+        title: '受診の目安',
+        text: '「いつもと違う痛み」や「強い痛み」がある場合は、早めに受診しましょう。何科か迷う場合は、まずは内科や整形外科へ。',
+        search: '近くの総合病院'
+    },
+    '冷やす': { title: '冷やす', text: 'ズキズキ痛む時や熱がある時は、保冷剤をタオルで巻いて当ててみて。' },
+    '温める': { title: '温める', text: 'お腹が痛い時や筋肉が凝っている時は、ゆっくりお風呂に浸かって温めよう。' },
+    '休む': { title: '休む', text: '一番の薬は睡眠です。スマホを置いて、暗い部屋でゆっくり休みましょう。' },
+    '水分': { title: '水分補給', text: '一度にたくさん飲まず、こまめに少しずつ常温の水を飲みましょう。' },
+    '呼吸': { title: 'リラックス呼吸', text: '鼻から吸って、口からゆっくり吐く。5回繰り返すと落ち着くよ。' },
+    '食事': { title: '食事のアドバイス', text: '消化に良いうどんやお粥を選ぼう。刺激物は控えめに。' },
+    '相談': { title: '相談しよう', text: '一人で抱え込まず、信頼できる人や学校の先生にこの記録を見せてみて。' }
+};
+
+// 2. モーダルを表示する関数
 function showDetail(type) {
-    const modal = document.getElementById('modal-detail') || document.getElementById('modal-overlay');
+    const modal = document.getElementById('modal-detail');
     const title = document.getElementById('detail-title');
     const text = document.getElementById('detail-text');
-    const guide = HEALTH_DATABASE[type];
 
-    if (guide && title && text) {
+    const guide = MEDICAL_GUIDE[type];
+
+    if (guide) {
         title.innerText = guide.title;
-        text.innerHTML = `<p>${guide.text}</p>` + (guide.search ?
-            `<button class="btn-solve" style="width:100%; margin-top:15px;" onclick="searchHospital('${guide.search}')">🏥 ${guide.search}を検索</button>` : '');
+        let content = `<p>${guide.text}</p>`;
+
+        // 検索ワードがある場合だけ、病院検索ボタンを追加
+        if (guide.search) {
+            content += `
+                <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                    <button class="btn-solve" style="width: 100%; background-color: #ff9800; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;" 
+                        onclick="searchHospital('${guide.search}')">
+                        🏥 ${guide.search}を検索
+                    </button>
+                </div>`;
+        }
+        text.innerHTML = content;
     }
-    if (modal) modal.style.display = 'block';
+    modal.style.display = 'block';
 }
 
+// 3. 病院検索（Googleマップ）へ飛ばす関数
 function searchHospital(query) {
     const q = query || "近くの病院";
-    window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, '_blank');
+    // ブラウザが認識しやすい標準的なURL形式に修正
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+    window.open(mapUrl, '_blank');
 }
 
-function closeModal() {
-    const modal = document.getElementById('modal-detail') || document.getElementById('modal-overlay');
-    if (modal) modal.style.display = 'none';
+// 4. モーダルを閉じる関数
+function closeDetail() {
+    document.getElementById('modal-detail').style.display = 'none';
 }
+
+
+// 4. 知恵袋投稿表示（community.html用）
+function renderPosts() {
+    const postList = document.getElementById('post-list');
+    const partFilter = document.getElementById('part-filter').value;
+    const posts = JSON.parse(localStorage.getItem('community_posts') || '[]');
+    postList.innerHTML = '';
+
+    const filteredPosts = partFilter === 'all' ? posts : posts.filter(p => p.part === partFilter);
+
+    filteredPosts.reverse().forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.innerHTML = `  
+            <div class="post-header">
+                <span class="post-tag">#${post.part}</span>
+                <span class="post-date">${new Date().toLocaleDateString()}</span>
+            </div>
+            <p>${post.text}</p>
+        `;
+        postList.appendChild(card);
+    }
+    );
+
+    if (filteredPosts.length === 0) {
+        postList.innerHTML = '<p style="text-align:center; padding:20px;">まだ投稿がありません。</p>';
+    }
+}
+
 
 // ==========================================
 // 5. 初期化（すべてのページ共通）
@@ -191,26 +294,133 @@ function autoSave(part) {
     displayPoints();
 }
 
-function showTapEffect(e) {
-    const effect = document.createElement('div');
-    effect.className = 'tap-effect';
-    effect.innerHTML = '+5';
-    effect.style.left = e.pageX + 'px';
-    effect.style.top = e.pageY + 'px';
-    document.body.appendChild(effect);
-    setTimeout(() => effect.remove(), 500);
-}
 
 
 
-
-function searchHospital(query) {
-    window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
-}
 
 function closeDetail() {
     document.getElementById('modal-detail').style.display = 'none';
 }
+
+
+
+
+
+let viewingDate = new Date(); // 現在表示している日付
+
+// 日付を変更する関数
+function changeDate(offset) {
+    viewingDate.setDate(viewingDate.getDate() + offset);
+    updateVisualization();
+}
+
+// 視覚化の更新
+function updateVisualization() {
+    const dateStr = viewingDate.toLocaleDateString();
+    const resultElement = document.getElementById("result");
+    if (resultElement) {
+        resultElement.innerText = "データを更新しました";
+    }
+
+
+    // ログを取得
+    const logs = JSON.parse(localStorage.getItem('kodama_logs_v2') || '[]');
+
+    // 全エリアの色をリセット
+    const areas = document.querySelectorAll('.touch-area');
+    areas.forEach(a => a.style.backgroundColor = 'transparent');
+
+    // 指定日の部位ごとの合計ダメージを集計
+    const summary = {};
+    logs.forEach(log => {
+        const logDate = new Date(log.date).toLocaleDateString();
+        if (logDate === dateStr) {
+            const part = log.details ? Object.keys(log.details)[0] : null;
+            if (part) {
+                summary[part] = (summary[part] || 0) + (Number(log.totalLevel) || 0);
+            }
+        }
+    });
+
+    // ダメージ量に応じて赤色を塗る
+    for (const part in summary) {
+        const targetEl = document.getElementById(`part-${part}`);
+        if (targetEl) {
+            const damage = summary[part];
+            // 透明度をダメージ量で変える (最大Lv.100と想定)
+            const opacity = Math.min(damage / 100, 0.8);
+            targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
+
+            // 視覚的に「熱い」感じを出すための影
+            targetEl.style.boxShadow = `0 0 ${damage / 5}px rgba(255, 0, 0, 0.5)`;
+        }
+    }
+}
+
+// htmlのonclickの代わりにJS側で一括設定する場合
+// 判定エリアへの一括イベント登録
+document.querySelectorAll('.touch-area').forEach(area => {
+    // pointerdownを使うことでスマホの反応を速くします
+    area.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); // ブラウザのデフォルト動作を防止
+
+        // IDから「area-」や「part-」を取り除いて部位名を取得
+        // HTML側で id="area-あたま" のように設定されている前提です
+        const partName = e.currentTarget.id.replace('area-', '').replace('part-', '');
+
+        // 記録処理
+        countUpAtLocation(partName, e);
+
+        // 視覚フィードバック（ぷるん）
+        e.currentTarget.style.transition = 'transform 0.1s';
+        e.currentTarget.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            e.currentTarget.style.transform = 'scale(1.0)';
+        }, 100);
+    });
+});
+
+// タップエフェクト（+5）の座標修正
+function showTapEffect(e) {
+    const effect = document.createElement('div');
+    effect.className = 'tap-effect';
+    effect.innerHTML = '+5';
+
+    // スクロール分を考慮した座標設定
+    effect.style.left = e.pageX + 'px';
+    effect.style.top = e.pageY + 'px';
+
+    document.body.appendChild(effect);
+
+    // アニメーションが終わったら削除
+    setTimeout(() => effect.remove(), 500);
+}
+
+// 左右スワイプ検知
+let touchstartX = 0;
+let touchendX = 0;
+
+document.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleGesture();
+});
+
+function handleGesture() {
+    if (touchendX < touchstartX - 50) changeDate(1);  // 左スワイプで翌日
+    if (touchendX > touchstartX + 50) changeDate(-1); // 右スワイプで前日
+}
+
+// ページ読み込み時に実行
+window.addEventListener('DOMContentLoaded', () => {
+    updateVisualization();
+});
+
+
+
 
 // ==========================================
 // 5. カレンダー・知恵袋・初期化
@@ -340,177 +550,6 @@ window.onload = function () {
 };
 
 
-// 6. ACTION: 救急BOX・知識カード
-const knowledge = {
-    '薬': '用法用量を守って飲みましょう。お薬手帳を持って医師に相談するのが一番安心です。',
-    '病院': '無理せず早めに受診しましょう。これまでのログを見せるとスムーズです。',
-    '冷やす': '熱がある時や、ズキズキ痛む時は保冷剤をタオルで巻いて当ててみて。',
-    '温める': 'お腹が痛い時や体がだるい時は、ゆっくりお風呂に浸かったりカイロで温めよう。',
-    '休む': '一番の薬は睡眠です。スマホを置いて、暗い部屋で目を閉じよう。',
-    '水分': '一度にたくさん飲まず、こまめに少しずつ常温の水を飲みましょう。',
-    '呼吸': '鼻から吸って、口からゆっくり吐く。これを5回繰り返すとリラックスできるよ。',
-    '食事': '消化に良いうどんやお粥を選ぼう。お菓子や刺激物は控えめに。',
-    '相談': '一人で抱え込まず、保健室の先生や親にこの「お薬手帳」の画面を見せてみて。'
-};
-
-function showDetail(type) {
-    const modal = document.getElementById('modal-detail');
-    const title = document.getElementById('detail-title');
-    const text = document.getElementById('detail-text');
-    const guide = HEALTH_DATABASE[type];
-
-    if (guide) {
-        title.innerText = guide.title;
-        let content = `<p>${guide.text}</p>`;
-
-        // 検索ワードがある場合のみボタンを表示
-        if (guide.search) {
-            content += `
-                <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                    <button class="btn-save" style="width: 100%;" onclick="searchHospital('${guide.search}')">
-                        🏥 ${guide.search}を検索
-                    </button>
-                </div>`;
-        }
-        text.innerHTML = content;
-    } else {
-        title.innerText = type;
-        text.innerText = "アドバイスを準備中です。";
-    }
-    modal.style.display = 'block';
-}
-
-
-const MEDICAL_INFO = {
-    '病院': {
-        title: '病院へ行くタイミング',
-        text: '・強い痛みが3日以上続く<br>・夜眠れないほどの痛みがある<br>・しびれや麻痺がある<br><br>これらに当てはまる場合は早めの受診を。',
-        action: '<button class="btn-save" onclick="searchHospital()">🏥 近くの病院を検索</button>'
-    },
-    '薬': {
-        title: 'お薬のアドバイス',
-        text: '市販の鎮痛剤は、用法用量を守って使いましょう。飲みすぎや空腹時の服用には注意が必要です。',
-        action: '<a href="https://www.kusurino-shiori.jp/" target="_blank">📖 くすりのしおりで調べる</a>'
-    }
-};
-
-function showDetail(type) {
-    const modal = document.getElementById('modal-detail');
-    const title = document.getElementById('detail-title');
-    const text = document.getElementById('detail-text');
-
-    // 基本データ
-    title.innerText = type;
-
-    // 詳細データがあれば差し替え、なければデフォルト
-    if (MEDICAL_INFO[type]) {
-        text.innerHTML = MEDICAL_INFO[type].text + '<br><br>' + (MEDICAL_INFO[type].action || "");
-    } else {
-        text.innerText = `${type}についての一般的な対処法を表示します...`;
-    }
-
-    modal.style.display = 'block';
-}
-
-function searchHospital(query) {
-    // 正しいGoogleマップ検索URL
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-    window.open(mapUrl, '_blank');
-}
-
-function closeDetail() {
-    document.getElementById('modal-detail').style.display = 'none';
-}
-
-// 症状に応じた解説と推奨される診療科のデータ
-const MEDICAL_GUIDE = {
-    '薬': {
-        title: 'お薬のアドバイス',
-        text: '市販の鎮痛剤は、用法用量を守って使いましょう。飲みすぎや空腹時の服用には注意が必要です。痛みが引かない場合は成分の異なる薬を試す前に医師に相談してください。',
-        search: '近くのドラッグストア'
-    },
-    '病院': {
-        title: '受診の目安',
-        text: '「いつもと違う痛み」「急激な悪化」「しびれを伴う」場合は、迷わず受診しましょう。何科に行けばいいか迷う場合は、まずは内科か整形外科が一般的です。',
-        search: '近くの総合病院'
-    },
-    'あたま': { // 部位別の解説も追加可能
-        title: '緊張型頭痛（かもしれない）',
-        text: '後頭部から首筋にかけて、重苦しい感じや締め付けられるような痛みが特徴です。ストレスや長時間の同じ姿勢が原因であることが多いです。',
-        search: '近くの脳神経外科 内科'
-    },
-    'こし・せなか': {
-        title: '筋筋膜性腰痛（かもしれない）',
-        text: '急な動作や長時間のデスクワークで筋肉が過度に緊張している状態です。安静にしすぎず、痛みのない範囲で動かす方が回復が早いこともあります。',
-        search: '近くの整形外科'
-    }
-};
-
-// 病院検索を実行する関数
-function searchHospital(query) {
-    if (!query) query = "近くの病院";
-    // Googleマップの検索用URLを生成
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-    window.open(mapUrl, '_blank');
-}
-
-function showDetail(type) {
-    const modal = document.getElementById('modal-detail');
-    const title = document.getElementById('detail-title');
-    const text = document.getElementById('detail-text');
-
-    // データがある場合は詳細を表示
-    const guide = MEDICAL_GUIDE[type];
-
-    if (guide) {
-        title.innerText = guide.title;
-        // テキスト + 検索ボタンを挿入
-        text.innerHTML = `
-            ${guide.text}
-            <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                <p style="font-size: 0.8em; color: #666;">▼ 今すぐ探す</p>
-                <button class="btn-save" style="width: 100%;" onclick="searchHospital('${guide.search}')">
-                    🔍 ${guide.search}を表示
-                </button>
-            </div>
-        `;
-    } else {
-        // デフォルト表示
-        title.innerText = type;
-        text.innerText = `${type}に関するアドバイスを準備中です。`;
-    }
-
-    modal.style.display = 'block';
-}
-
-
-// 4. 知恵袋投稿表示（community.html用）
-function renderPosts() {
-    const postList = document.getElementById('post-list');
-    const partFilter = document.getElementById('part-filter').value;
-    const posts = JSON.parse(localStorage.getItem('community_posts') || '[]');
-    postList.innerHTML = '';
-
-    const filteredPosts = partFilter === 'all' ? posts : posts.filter(p => p.part === partFilter);
-
-    filteredPosts.reverse().forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.innerHTML = `  
-            <div class="post-header">
-                <span class="post-tag">#${post.part}</span>
-                <span class="post-date">${new Date().toLocaleDateString()}</span>
-            </div>
-            <p>${post.text}</p>
-        `;
-        postList.appendChild(card);
-    }
-    );
-
-    if (filteredPosts.length === 0) {
-        postList.innerHTML = '<p style="text-align:center; padding:20px;">まだ投稿がありません。</p>';
-    }
-}
 
 
 // ==========================================
