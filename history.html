@@ -4,59 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <title>お薬手帳 - 痛みログ</title>
+
+    <link rel="stylesheet" href="./css/chart.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <style>
-        .history-container {
-            padding: 15px;
+        /* 下部ナビゲーション */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            background: #55bbbf;
+            z-index: 1000;
+            height: 100px;
+            justify-content: center;
         }
 
-        .history-desc {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 15px;
+        .nav-item {
+            flex: 1;
             text-align: center;
         }
 
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        .nav-item img {
+            width: 80px;
+            height: auto;
+            margin-top: 10px;
         }
 
-        .history-table th {
-            background: #e3f2fd;
-            /* 薄い青で医療っぽさを出す */
-            color: #1976d2;
-            padding: 12px 8px;
-            font-size: 0.9em;
-            text-align: left;
+        .nav-bar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            transition: 0.3s;
         }
 
-        .history-table td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9em;
-            color: #444;
-        }
-
-        .part-tag {
-            background: #fff3e0;
-            color: #e65100;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-
-        .lv-badge {
-            color: #ff5252;
-            font-weight: bold;
+        /* コンテンツがナビに隠れないように余白を追加 */
+        main {
+            padding-bottom: 120px;
         }
     </style>
 </head>
@@ -66,6 +52,9 @@
         <div class="history-container">
             <h2>🏥 お薬手帳（痛みログ）</h2>
             <p class="history-desc">これまでの記録を先生に見せてね！</p>
+
+            <div id="damage-chart-root" class="chart-section">
+            </div>
 
             <div id="history-list">
                 <table class="history-table">
@@ -80,23 +69,18 @@
                     </tbody>
                 </table>
             </div>
-
-            <div id="no-history" style="display:none; text-align:center; padding:40px;">
-                <p>まだ記録がありませんコケ。</p>
-                <a href="index.html" class="btn-main">記録しにいく</a>
-            </div>
         </div>
     </main>
 
     <footer>
         <nav class="nav-bar">
-            <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
-            <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
-            <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
+            <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt="ホーム"></a>
+            <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt="カレンダー"></a>
+            <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt="ゲーム"></a>
         </nav>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/chart.js"></script>
 </body>
 
 </html>
