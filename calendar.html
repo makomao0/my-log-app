@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カレンダー - カラダのログちゃん</title>
-     <link rel="stylesheet" href="./css/action-style.css">
+
+    <link rel="stylesheet" href="./css/action-style.css">
     <link rel="icon" href="images/my-icon.ico" type="image/x-icon">
 
 </head>
@@ -31,7 +32,10 @@
                 <div>土</div>
             </div>
             <div id="calendar-grid" class="calendar-grid"></div>
+            <div id="event-list-container" class="event-list-area"></div>
         </div>
+
+
     </main>
 
     <footer>
@@ -42,13 +46,10 @@
         </nav>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/calendar.js"></script>
     <script>
         window.onload = renderCalendar;
     </script>
 </body>
 
 </html>
-
-
-
