@@ -20,7 +20,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
- background-image: url(../imgs/home-bg.png);
+    background-image: url(../imgs/home-bg.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -73,9 +73,6 @@ main {
     gap: 5px;
     padding: 10px;
 
-    /* 重要：ナビゲーション(100px)＋少しの余裕(20px)を下に確保 */
-    margin-bottom: 120px;
-
     /* 画面からはみ出さないよう、高さを自動調整 */
     max-height: calc(100vh - 250px);
     overflow: hidden;
@@ -117,6 +114,123 @@ main {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
+}
+
+/* カレンダーの選択中スタイル */
+.cal-day.selected {
+    background-color: #55bbbf !important;
+    color: white;
+    border-radius: 50%;
+}
+
+/* 縦型カルーセルの容器 */
+.vertical-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 280px;
+    /* カード約2枚分見える高さ */
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    /* カチッと止まる設定 */
+    padding: 10px 5px;
+}
+
+/* 各カードのスタイル */
+.carousel-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    border: 2px solid #55bbbf;
+    scroll-snap-align: start;
+    /* スクロールした時にこの位置で止まる */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.card-time {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.card-badge {
+    background: #55bbbf;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.card-body {
+    font-size: 1rem;
+    color: #333;
+}
+
+.card-body strong {
+    color: #ea7824;
+    /* primaryカラー */
+}
+
+/* イベント詳細エリア */
+.event-list-area {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    border: 2px solid #55bbbf;
+}
+
+.event-date-header {
+    font-weight: bold;
+    color: #333;
+    border-bottom: 2px solid #55bbbf;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #ccc;
+}
+
+.event-time {
+    font-size: 0.8rem;
+    color: #666;
+    min-width: 50px;
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.event-detail span {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.event-summary {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #55bbbf;
+}
+
+.no-event {
+    text-align: center;
+    color: #999;
+    padding: 20px;
 }
 
 .weekdays {
@@ -314,4 +428,3 @@ textarea {
     border: 2px solid #e1ff4d !important;
     z-index: 5;
 }
-
