@@ -377,7 +377,7 @@ main {
 ------------------------- */
 
 /* ▼ 耳（area-headクラスを持っていますが、IDで位置を個別に指定します） ▼ */
-#part-ひだりみみ {
+#part-ear-l {
     top: 2%;
     left: 20%;
     /* 頭の左側 */
@@ -386,7 +386,7 @@ main {
     border-radius: 50%;
 }
 
-#part-みぎみみ {
+#part-ear-r {
     top: 2%;
     left: 65%;
     /* 頭の右側 */
@@ -544,72 +544,7 @@ main {
     }
 }
 
-/* 分析画面のヒートスポット */
-/* ヒートマップのコンテナ */
-.heatmap-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--card-bg);
-    border-radius: 20px;
-    border: 1px solid #ea7824;
-    margin: 15px;
-}
 
-.body-mini {
-    position: relative;
-    /* これが重要：スポットの基準点になる */
-    width: 100px;
-    display: inline-block;
-}
-
-
-
-.heat-spot {
-    position: absolute;
-    width: 25px;
-    /* 少し大きくすると見やすい */
-    height: 25px;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(3px);
-    /* じわっと光らせる */
-    z-index: 5;
-}
-
-/* 位置の微調整（画像に合わせて調整してください） */
-#heat-head {
-    top: 5%;
-    left: 35%;
-}
-
-#heat-stomach {
-    top: 40%;
-    left: 35%;
-}
-
-#heat-back {
-    top: 60%;
-    left: 35%;
-}
-
-
-
-
-/* 各部位の光の位置を🧍‍♀️に合わせる */
-.spot-あたま {
-    top: 10%;
-    left: 45%;
-    width: 50px;
-    height: 50px;
-}
-
-.spot-おなか {
-    top: 40%;
-    left: 43%;
-    width: 70px;
-    height: 70px;
-}
 
 /* ...他の部位も同様に設定 */
 
