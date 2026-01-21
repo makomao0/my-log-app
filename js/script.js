@@ -5,64 +5,21 @@
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
 let sessionLogs = {};
-let displayDate = new Date();
-let currentTopPart = "all"; // 現在の分析で一番痛い部位
+let viewingDate = new Date(); // 現在表示・選択している日付
+let currentTopPart = "all";
 
-// アドバイスと病院検索のデータベース
 const HEALTH_DATABASE = {
-    // --- 既存の項目 ---
-    'あたま': {
-        title: '緊張型頭痛（かも？）',
-        text: '首や肩のコリ、ストレスが原因かもしれません。目を休めて温めてみて。',
-        search: '近くの脳神経外科 内科'
-    },
-    'おなか': {
-        title: '消化不良・腹痛（かも？）',
-        text: 'お腹を温めて、消化に良いうどんやお粥を食べましょう。',
-        search: '近くの消化器内科'
-    },
-    'こし・せなか': {
-        title: '筋肉の疲れ（かも？）',
-        text: '同じ姿勢が続いていませんか？軽いストレッチが効果的です。',
-        search: '近くの整形外科'
-    },
-
-    // --- 新しく追加する項目 ---
-    'みみ': {
-        title: '耳の違和感（かも？）',
-        text: '耳鳴りや詰まった感じはありませんか？気圧の変化や疲れでも起こります。',
-        search: '近くの耳鼻咽喉科'
-    },
+    'あたま': { title: '緊張型頭痛（かも？）', text: '首や肩のコリ、ストレスが原因かもしれません。目を休めて温めてみて。', search: '近くの脳神経外科 内科' },
+    'おなか': { title: '消化不良・腹痛（かも？）', text: 'お腹を温めて、消化に良いうどんやお粥を食べましょう。', search: '近くの消化器内科' },
+    'こし・せなか': { title: '筋肉の疲れ（かも？）', text: '同じ姿勢が続いていませんか？軽いストレッチが効果等。', search: '近くの整形外科' },
+    'みみ': { title: '耳の違和感（かも？）', text: '耳鳴りや詰まった感じはありませんか？気圧の変化や疲れでも。', search: '近くの耳鼻咽喉科' },
     'みぎみみ': { title: '右耳の違和感', text: '耳を触りすぎていませんか？静かな場所で休みましょう。', search: '近くの耳鼻咽喉科' },
-    'ひだりみみ': { title: '左耳の違和感', text: '疲れが溜まっているサインかも。ゆっくり耳の周りをほぐして。', search: '近くの耳鼻咽喉科' },
-
-    'くび': {
-        title: '首のコリ・痛み（かも？）',
-        text: 'スマホを長時間見ていませんか？「ストレートネック」に注意。',
-        search: '近くの整形外科'
-    },
-    'むね': {
-        title: '胸の痛み・動悸（かも？）',
-        text: 'チクチク、ズキズキする場合は、ストレスや胃酸の逆流の可能性も。',
-        search: '近くの循環器内科 内科'
-    },
-    'うで': {
-        title: '腕のだるさ・疲れ（かも？）',
-        text: 'キーボード操作や重い荷物で筋肉が張っています。手首を回して。',
-        search: '近くの整形外科'
-    },
-    'みぎうで': { title: '右腕の疲れ', text: '利き腕の使いすぎかもしれません。', search: '近くの整形外科' },
-    'ひだりうで': { title: '左腕の疲れ', text: '無理な姿勢で寝ていませんでしたか？', search: '近くの整形外科' },
-
-    'あし': {
-        title: '足の疲れ・むくみ（かも？）',
-        text: '立ち仕事や歩きすぎが原因かも。足首を回したり、高くして寝てみて。',
-        search: '近くの整形外科'
-    },
-    'みぎあし': { title: '右足の疲れ', text: '重心が右に偏っているかもしれません。', search: '近くの整形外科' },
-    'ひだりあし': { title: '左足の疲れ', text: 'ストレッチで血行を良くしましょう。', search: '近くの整形外科' },
+    'ひだりみみ': { title: '左耳の違和感', text: '疲れが溜まっているサインかも。', search: '近くの耳鼻咽喉科' },
+    'くび': { title: '首のコリ・痛み（かも？）', text: 'スマホを長時間見ていませんか？', search: '近くの整形外科' },
+    'むね': { title: '胸の痛み・動悸（かも？）', text: 'ストレスや胃酸の逆流の可能性も。', search: '近くの循環器内科' },
+    'うで': { title: '腕のだるさ・疲れ（かも？）', text: '手首を回して筋肉をほぐしましょう。', search: '近くの整形外科' },
+    'あし': { title: '足の疲れ・むくみ（かも？）', text: '足を高くして寝てみて。', search: '近くの整形外科' }
 };
-
 // ==========================================
 // 2. 分析機能（analysis.html用）
 // ==========================================
@@ -248,18 +205,49 @@ function renderPosts() {
 
 function init() {
     displayPoints();
+    updateVisualization();
 
-    // ホーム画面（index.html）の場合
+    // ホーム画面のLv表示
     const lvEl = document.getElementById('lv');
     if (lvEl) {
-        // 保存されたログから合計ダメージを計算
         const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const total = logs.reduce((sum, log) => sum + log.totalLevel, 0);
-
+        const total = logs.reduce((sum, log) => sum + (log.totalLevel || 0), 0);
         lvEl.innerText = total;
-        updateFace(total); // ページ読み込み時に顔をセット
+        updateFace(total);
     }
+
+    // 履歴画面
+    if (document.getElementById('history-body')) {
+        renderDamageChart();
+        renderHistory();
+    }
+
+    // 分析画面
+    if (document.getElementById('type-result')) renderAnalysis();
 }
+
+// イベント登録
+document.addEventListener('DOMContentLoaded', init);
+
+// タッチエリアのイベント一括登録
+document.addEventListener('pointerdown', (e) => {
+    const area = e.target.closest('.touch-area');
+    if (area) {
+        e.preventDefault();
+        const partName = area.id.replace('area-', '').replace('part-', '');
+        countUpAtLocation(partName, e);
+        area.style.transform = 'scale(1.2)';
+        setTimeout(() => area.style.transform = 'scale(1.0)', 100);
+    }
+});
+
+// スワイプ検知
+let startX = 0;
+document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
+document.addEventListener('touchend', e => {
+    let diff = e.changedTouches[0].pageX - startX;
+    if (Math.abs(diff) > 50) changeDate(diff > 0 ? -1 : 1);
+});
 
 // これひとつで確実に実行
 if (document.readyState === 'loading') {
@@ -271,27 +259,31 @@ if (document.readyState === 'loading') {
 // 2. 痛みの記録機能
 // ==========================================
 function countUpAtLocation(part, event) {
-    sessionLogs[part] = (sessionLogs[part] || 0) + 5;
-    let totalLv = Object.values(sessionLogs).reduce((a, b) => a + b, 0);
+    const damage = 5;
+    sessionLogs[part] = (sessionLogs[part] || 0) + damage;
+
+    // 総ダメージ計算
+    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const currentTotal = logs.reduce((sum, l) => sum + (l.totalLevel || 0), 0) + damage;
 
     // UI更新
     const lvEl = document.getElementById('lv');
-    const partEl = document.getElementById('target-part');
-    if (lvEl) lvEl.innerText = Math.min(totalLv, 1000);
-    if (partEl) partEl.innerText = `【${part}】を記録中...`;
+    if (lvEl) lvEl.innerText = currentTotal;
+    updateFace(currentTotal);
 
     if (event) showTapEffect(event);
-    autoSave(part);
+    autoSave(part, damage);
 }
 
-function autoSave(part) {
+function autoSave(part, amount) {
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    logs.push({ date: new Date().toISOString(), details: { [part]: 5 }, totalLevel: 5 });
+    logs.push({ date: new Date().toISOString(), details: { [part]: amount }, totalLevel: amount });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 
-    let points = parseInt(localStorage.getItem(POINT_KEY) || '0');
-    localStorage.setItem(POINT_KEY, points + 1);
+    let pts = parseInt(localStorage.getItem(POINT_KEY) || '0');
+    localStorage.setItem(POINT_KEY, pts + 1);
     displayPoints();
+    updateVisualization(); // 記録直後にヒートマップ更新
 }
 
 
@@ -306,7 +298,7 @@ function closeDetail() {
 
 
 
-let viewingDate = new Date(); // 現在表示している日付
+
 
 // 日付を変更する関数
 function changeDate(offset) {
@@ -315,45 +307,104 @@ function changeDate(offset) {
 }
 
 // 視覚化の更新
+// 視覚化の更新
+// 視覚化の更新
+// 1. 今日へ戻る関数
+// ==========================================
+// 2. 視覚化・日付切り替え（index.html / analysis.html用）
+// ==========================================
+
+function changeDate(offset) {
+    viewingDate.setDate(viewingDate.getDate() + offset);
+    updateVisualization();
+}
+
+function resetToToday() {
+    viewingDate = new Date();
+    updateVisualization();
+}
+
 function updateVisualization() {
-    const dateStr = viewingDate.toLocaleDateString();
-    const resultElement = document.getElementById("result");
-    if (resultElement) {
-        resultElement.innerText = "データを更新しました";
-    }
+    // 日付表示の更新 (0埋めあり)
+    const y = viewingDate.getFullYear();
+    const m = String(viewingDate.getMonth() + 1).padStart(2, '0');
+    const d = String(viewingDate.getDate()).padStart(2, '0');
+    const dateStrFormatted = `${y}/${m}/${d}`;
+    const dateStrCompare = viewingDate.toLocaleDateString();
 
+    const dateDisplay = document.getElementById("current-date-display");
+    if (dateDisplay) dateDisplay.innerText = dateStrFormatted;
 
-    // ログを取得
-    const logs = JSON.parse(localStorage.getItem('kodama_logs_v2') || '[]');
+    // 今日ボタンの表示制御
+    const todayBtn = document.getElementById("today-reset-btn");
+    const isToday = new Date().toLocaleDateString() === dateStrCompare;
+    if (todayBtn) todayBtn.style.visibility = isToday ? "hidden" : "visible";
 
-    // 全エリアの色をリセット
-    const areas = document.querySelectorAll('.touch-area');
-    areas.forEach(a => a.style.backgroundColor = 'transparent');
+    // エリアリセット
+    document.querySelectorAll('.touch-area').forEach(a => {
+        a.style.backgroundColor = 'transparent';
+        a.style.boxShadow = 'none';
+    });
 
-    // 指定日の部位ごとの合計ダメージを集計
+    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let hasAnyLog = false;
     const summary = {};
+
     logs.forEach(log => {
-        const logDate = new Date(log.date).toLocaleDateString();
-        if (logDate === dateStr) {
-            const part = log.details ? Object.keys(log.details)[0] : null;
-            if (part) {
-                summary[part] = (summary[part] || 0) + (Number(log.totalLevel) || 0);
+        if (new Date(log.date).toLocaleDateString() === dateStrCompare) {
+            hasAnyLog = true;
+            for (let part in log.details) {
+                summary[part] = (summary[part] || 0) + (Number(log.details[part]) || 0);
             }
         }
     });
 
-    // ダメージ量に応じて赤色を塗る
-    for (const part in summary) {
-        const targetEl = document.getElementById(`part-${part}`);
+    // 状態メッセージ
+    const targetPartEl = document.getElementById('target-part');
+    if (targetPartEl) {
+        targetPartEl.innerText = hasAnyLog ? "痛いところを押してね" : "この日の記録はありません";
+    }
+
+    // ヒートマップ反映
+    for (let part in summary) {
+        const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
         if (targetEl) {
             const damage = summary[part];
-            // 透明度をダメージ量で変える (最大Lv.100と想定)
-            const opacity = Math.min(damage / 100, 0.8);
+            const opacity = Math.min(damage / 50, 0.7);
             targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
-
-            // 視覚的に「熱い」感じを出すための影
-            targetEl.style.boxShadow = `0 0 ${damage / 5}px rgba(255, 0, 0, 0.5)`;
+            targetEl.style.boxShadow = `0 0 15px rgba(255, 0, 0, ${opacity})`;
         }
+    }
+}
+// ログがない時のメッセージ
+const targetPartEl = document.getElementById('target-part');
+if (targetPartEl) {
+    targetPartEl.innerText = hasAnyLog ? "痛いところを押してね" : "この日の記録はありません";
+}
+
+// データの反映（ここは元のままでOK！）
+for (const part in summary) {
+    const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
+    if (targetEl) {
+        const damage = summary[part];
+        const opacity = Math.min(damage / 50, 0.7);
+        targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
+        targetEl.style.boxShadow = `0 0 15px rgba(255, 0, 0, ${opacity})`;
+    }
+}
+
+
+// ダメージ量に応じて赤色を塗る
+for (const part in summary) {
+    const targetEl = document.getElementById(`part-${part}`);
+    if (targetEl) {
+        const damage = summary[part];
+        // 透明度をダメージ量で変える (最大Lv.100と想定)
+        const opacity = Math.min(damage / 100, 0.8);
+        targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
+
+        // 視覚的に「熱い」感じを出すための影
+        targetEl.style.boxShadow = `0 0 ${damage / 5}px rgba(255, 0, 0, 0.5)`;
     }
 }
 
@@ -384,15 +435,10 @@ document.querySelectorAll('.touch-area').forEach(area => {
 function showTapEffect(e) {
     const effect = document.createElement('div');
     effect.className = 'tap-effect';
-    effect.innerHTML = '+5';
-
-    // スクロール分を考慮した座標設定
+    effect.innerText = '+5';
     effect.style.left = e.pageX + 'px';
     effect.style.top = e.pageY + 'px';
-
     document.body.appendChild(effect);
-
-    // アニメーションが終わったら削除
     setTimeout(() => effect.remove(), 500);
 }
 
@@ -400,9 +446,7 @@ function showTapEffect(e) {
 let touchstartX = 0;
 let touchendX = 0;
 
-document.addEventListener('touchstart', e => {
-    touchstartX = e.changedTouches[0].screenX;
-});
+
 
 document.addEventListener('touchend', e => {
     touchendX = e.changedTouches[0].screenX;
@@ -556,63 +600,82 @@ window.onload = function () {
 // にわとりのつぶやき & 変化機能
 // ==========================================
 
-function countUpAtLocation(part, event) {
-    sessionLogs[part] = (sessionLogs[part] || 0) + 5;
-    let totalLv = Object.values(sessionLogs).reduce((a, b) => a + b, 0);
-
-    const lvEl = document.getElementById('lv');
-    if (lvEl) {
-        lvEl.innerText = totalLv;
-        // 【ここが重要！】レベルが変わったので顔を更新
-        updateFace(totalLv);
-    }
-
-    if (event) showTapEffect(event);
-    autoSave(part);
-}
 
 
 // ==========================================
 // お薬手帳（履歴一覧）表示機能
 // ==========================================
 function renderHistory() {
-    const historyBody = document.getElementById('history-body');
-    const noHistory = document.getElementById('no-history');
-    const historyList = document.getElementById('history-list');
-
-    if (!historyBody) return; // 履歴画面じゃない場合は何もしない
+    const body = document.getElementById('history-body');
+    if (!body) return;
 
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
     if (logs.length === 0) {
-        if (noHistory) noHistory.style.display = 'block';
-        if (historyList) historyList.style.display = 'none';
+        body.innerHTML = '<tr><td colspan="3" style="text-align:center;">記録がありません</td></tr>';
         return;
     }
 
-    // 新しい順（降順）に並び替え
-    const sortedLogs = logs.reverse();
-
-    historyBody.innerHTML = sortedLogs.map(log => {
-        const date = new Date(log.date);
-        const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-
-        // 部位を取り出す（detailsオブジェクトのキーを取得）
-        const parts = Object.keys(log.details).join(', ');
-
+    body.innerHTML = [...logs].reverse().map(log => {
+        const d = new Date(log.date);
+        const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
         return `
             <tr>
                 <td>${dateStr}</td>
-                <td><span class="part-tag">${parts}</span></td>
+                <td><span class="part-tag">${Object.keys(log.details).join(', ')}</span></td>
                 <td><span class="lv-badge">${log.totalLevel}</span></td>
             </tr>
         `;
     }).join('');
 }
 
-// 初期化(init)を修正
-function init() {
-    displayPoints();
-    // 既存の処理...
-    if (document.getElementById('history-body')) renderHistory();
+
+
+// 履歴画面の初期化
+function initHistoryPage() {
+    // 1. グラフを描画
+    renderDamageChart();
+    // 2. 履歴テーブルを描画
+    renderHistory();
 }
+
+// グラフ描画ロジック
+function renderDamageChart() {
+    const viewport = document.querySelector('.chart-viewport');
+    if (!viewport) return;
+
+    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const now = new Date();
+    const hourlyData = new Array(24).fill(0);
+
+    logs.forEach(log => {
+        const logDate = new Date(log.date);
+        const diffHours = Math.floor((now - logDate) / (1000 * 60 * 60));
+        if (diffHours >= 0 && diffHours < 24) {
+            hourlyData[23 - diffHours] += Number(log.totalLevel) || 0;
+        }
+    });
+
+    const maxVal = Math.max(...hourlyData, 10);
+    viewport.innerHTML = hourlyData.map((val, i) => {
+        const height = (val / maxVal) * 100;
+        const hourLabel = (now.getHours() - (23 - i) + 24) % 24;
+        const barColor = val >= 50 ? '#ef4444' : '#ea7824';
+        const labelText = hourLabel % 3 === 0 ? `${hourLabel}h` : '';
+
+        return `
+            <div class="chart-bar-group">
+                <div class="chart-value" style="opacity: ${val > 0 ? 0.8 : 0}">${val}</div>
+                <div class="chart-bar" style="height: ${height}%; background: ${barColor};"></div>
+                <div class="chart-label">${labelText}</div>
+            </div>
+        `;
+    }).join('');
+}
+// 既存の init 関数を拡張
+const originalInit = init;
+init = function () {
+    originalInit();
+    if (document.getElementById('history-body')) {
+        initHistoryPage();
+    }
+};
