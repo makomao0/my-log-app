@@ -3,10 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>3匹のセレクトページ - CSS黒目調整版</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3匹のセレクトページ - 修正完了版</title>
     <style>
-        /* --- 前半のスタイルは維持 --- */
         body {
             margin: 0;
             overflow: hidden;
@@ -16,6 +15,16 @@
             align-items: center;
             height: 100vh;
             font-family: sans-serif;
+            width: 100%;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .menu {
@@ -32,6 +41,7 @@
             border-radius: 30px;
             background: white;
             font-weight: bold;
+            font-size: 14px;
         }
 
         button.active {
@@ -39,54 +49,111 @@
             color: white;
         }
 
-        #stage {
-            flex-grow: 1;
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
+            display: flex;
+            background: #55bbbf;
+            z-index: 1000;
+            height: 100px;
+            justify-content: center;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            background-size: cover;
-            background-position: center;
         }
 
+        .nav-bar img {
+            width: 100px;
+            height: auto;
+            pointer-events: none;
+        }
+
+        .nav-bar :hover {
+            background: #f5f5f5;
+            transform: scale(1.01);
+            transition: 0.5s;
+        }
+
+        /* --- ステージ（背景） --- */
+        #stage {
+            width: 100%;
+            height: calc(100vh - 180px);
+            /* 上下のメニュー分を引く */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            background-color: #f7e1c3;
+            background-size: auto 100%;
+            /* 基本は高さに合わせる */
+
+            touch-action: none;
+            user-select: none;
+            overflow: hidden;
+            /* はみ出した拡大背景を隠す */
+        }
+
+        /* --- キャラクターコンテナ --- */
         #character {
             position: relative;
+            /* サイズは固定値で作る（これが一番崩れない） */
             width: 400px;
             height: 340px;
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 5;
+
+            /* 基準点を「下」にする（拡大した時に足が浮かないように） */
+            transform-origin: center bottom;
+            transition: transform 0.3s ease;
+            /* 切り替え時のアニメーション */
         }
 
-
-
+        /* パーツ共通 */
         .part {
             position: absolute;
+            width: 350px;
+            /* ここも固定値 */
+            height: 350px;
+            /* ここも固定値 */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             pointer-events: none;
+            /* マウスイベントを透過 */
         }
 
+        /* 体と顔の位置合わせ */
         #body {
-            width: 350px;
-            height: 350px;
             z-index: 1;
             bottom: 0;
+            /* 下揃え */
         }
 
         #face {
-            width: 350px;
-            height: 350px;
             z-index: 2;
             top: 0;
+            /* 上揃え */
+            /* 顔と体が350pxの正方形の中で重なるように作られている前提 */
         }
 
-        /* --- 目のカスタマイズ部分 --- */
+        /* --- 目 --- */
         .eye-container {
             position: absolute;
             top: 70%;
+            /* 顔の中での相対位置 */
             width: 100%;
             display: flex;
             justify-content: center;
@@ -95,63 +162,92 @@
             transform: rotate(-8deg);
         }
 
-        /* 白目の枠（横長の楕円） */
         .eye-wrap {
             width: 80px;
-            /* 白目の横幅 */
             height: 30px;
-            /* 白目の高さ */
             position: relative;
-            background-color: rgb(255, 255, 255);
-            /* 白目の色 */
+            background-color: #fff;
             border-radius: 50%;
             overflow: hidden;
-            /* 黒目がはみ出さないようにする */
             display: flex;
             justify-content: center;
             align-items: center;
             border: 4px solid #704c19;
-            /* 輪郭を少しはっきりさせる */
         }
 
-        /* 黒目：CSS（Color）で作成する横長の楕円 */
         .eye-ball {
             width: 70px;
-            /* 黒目の横幅（ここを調整！） */
             height: 25px;
-            /* 黒目の高さ（ここを調整！） */
             background-color: #704c19;
-            /* 黒目の色 */
             border-radius: 50%;
-            /* 楕円形にする */
             position: absolute;
+        }
+
+        /* --- スマホ用調整（CSSのみで制御！） --- */
+        @media (max-width: 480px) {
+
+            /* キャラクターをCSSで「ズーム」する */
+            #character {
+                transform: scale(1.3);
+                /* 1.3倍に拡大表示 */
+            }
+
+            /* 背景も少しズームして迫力を出す */
+            #stage {
+                background-size: auto 120%;
+                background-position: center 80%;
+            }
+
+            .menu {
+                transform: scale(0.9);
+                gap: 5px;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+
+            footer {
+                height: 130px;
+            }
+
+            .nav-bar {
+                height: 130px;
+            }
+
+            .nav-bar img {
+                width: 100px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <main>
 
-    <div class="menu">
-        <button onclick="changeChar('cat')" id="btn-cat" class="active">ネコのお部屋</button>
-        <button onclick="changeChar('bird')" id="btn-bird">トリの大空</button>
-        <button onclick="changeChar('sheep')" id="btn-sheep">ヒツジの草原</button>
-    </div>
-
-    <div id="stage">
-        <div id="character">
-            <div class="part" id="body"></div>
-            <div class="part" id="face">
-                <div class="eye-container">
-                    <div class="eye-wrap">
-                        <div class="eye-ball" id="eyeL"></div>
-                    </div>
-                    <div class="eye-wrap">
-                        <div class="eye-ball" id="eyeR"></div>
+        <div id="stage">
+            <div class="menu">
+                <button onclick="changeChar('cat')" id="btn-cat" class="active">ネコのお部屋</button>
+                <button onclick="changeChar('bird')" id="btn-bird">トリの大空</button>
+                <button onclick="changeChar('sheep')" id="btn-sheep">ヒツジの草原</button>
+            </div>
+            <div id="character">
+                <div class="part" id="body"></div>
+                <div class="part" id="face">
+                    <div class="eye-container">
+                        <div class="eye-wrap">
+                            <div class="eye-ball" id="eyeL"></div>
+                        </div>
+                        <div class="eye-wrap">
+                            <div class="eye-ball" id="eyeR"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
     <footer>
         <nav class="nav-bar">
             <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
@@ -171,7 +267,6 @@
                 face: 'imgs/character/cat_face.png',
                 config: {
                     isCircle: false,
-                    charHeight: '340px', // ネコは元の高さ
                     speed: 0.05,
                     eyeRangeX: 8,
                     eyeRangeY: 4,
@@ -180,7 +275,7 @@
                     eyeGap: '45px',
                     eyeRotate: '-8deg',
                     eyeSize: 1,
-                    bodyZ: 1
+                    bodyZ: 1,
                 }
             },
             bird: {
@@ -189,13 +284,15 @@
                 face: 'imgs/character/bird_face.png',
                 config: {
                     isCircle: true,
-                    charHeight: '340px',
+                    isSingleEye: true, // ★ここを追加
                     speed: 0.1,
                     eyeRangeX: 10,
                     eyeRangeY: 10,
                     rotate: 0.08,
-                    eyeTop: '35%',
-                    eyeGap: '40px',
+                    eyeTop: '33%',
+                    eyeGap: '100px',
+                    eyePaddingLeft: '40px', /* ★ここで右に寄せる距離を調整 */
+                    ballSize: 1.8,    /* ★黒目だけの大きさをここで調整（1.0が標準） */
                     eyeRotate: '0deg',
                     eyeSize: 1,
                     bodyZ: 1
@@ -207,16 +304,15 @@
                 face: 'imgs/character/sheep_face.png',
                 config: {
                     isCircle: false,
-                    charHeight: '350px', // ヒツジだけ 350px に個別設定
                     speed: 0.02,
                     eyeRangeX: 5,
                     eyeRangeY: 5,
                     rotate: 0.01,
                     eyeTop: '40%',
                     eyeGap: '45px',
-                    eyeRotate: '0deg',
-                    eyeSize: 0.75,
-                    bodyZ: 3
+                    eyeRotate: '-4deg',
+                    eyeSize: 0.78,
+                    bodyZ: 3,
                 }
             }
         };
@@ -226,45 +322,77 @@
             const data = charData[id];
             const conf = data.config;
 
+            // ★修正ポイント：ここでのサイズ変更（scaleFactor計算）を全部消しました！
+            // サイズはCSSの zoom / scale にお任せします。
+
             document.getElementById('stage').style.backgroundImage = `url(${data.bg})`;
             document.getElementById('body').style.backgroundImage = `url(${data.body})`;
             document.getElementById('face').style.backgroundImage = `url(${data.face})`;
 
-            // --- 追加：キャラクター枠の高さを個別に反映 ---
-            document.getElementById('character').style.height = conf.charHeight;
-
-            // --- 体と顔の前後関係を調整 ---
             document.getElementById('body').style.zIndex = conf.bodyZ;
 
             const container = document.querySelector('.eye-container');
             container.style.top = conf.eyeTop;
-            container.style.gap = conf.eyeGap;
+            container.style.gap = conf.eyeGap; // 元の値をそのまま使う
             container.style.transform = `rotate(${conf.eyeRotate})`;
+
+            container.style.paddingLeft = conf.eyePaddingLeft || '0px';
 
             const eyeWraps = document.querySelectorAll('.eye-wrap');
             const eyeBalls = [document.getElementById('eyeL'), document.getElementById('eyeR')];
-
             eyeWraps.forEach((wrap, index) => {
                 const ball = eyeBalls[index];
                 const s = conf.eyeSize;
+                const bs = conf.ballSize || 1.0; // 設定がない場合は1倍にする
+
+                if (conf.isSingleEye && index === 1) {
+                    wrap.style.display = 'none';
+                } else {
+                    wrap.style.display = 'flex';
+                }
 
                 if (conf.isCircle) {
+                    // 白目のサイズ
                     wrap.style.width = (60 * s) + 'px';
                     wrap.style.height = (60 * s) + 'px';
-                    ball.style.width = (30 * s) + 'px';
-                    ball.style.height = (30 * s) + 'px';
+                    // 黒目のサイズ（bsを掛ける）
+                    ball.style.width = (30 * s * bs) + 'px';
+                    ball.style.height = (30 * s * bs) + 'px';
                 } else {
+                    // 白目のサイズ
                     wrap.style.width = (80 * s) + 'px';
                     wrap.style.height = (30 * s) + 'px';
-                    ball.style.width = (70 * s) + 'px';
-                    ball.style.height = (30 * s) + 'px';
+                    // 黒目のサイズ（bsを掛ける）
+                    ball.style.width = (70 * s * bs) + 'px';
+                    ball.style.height = (30 * s * bs) + 'px';
                 }
             });
 
             document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-' + id).classList.add('active');
         }
-        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        // --- 動きのループ処理 ---
+        function updatePointer(x, y) {
+            mouseX = x;
+            mouseY = y;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            updatePointer(e.clientX, e.clientY);
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#stage')) {
+                // e.preventDefault(); 
+            }
+            const touch = e.touches[0];
+            updatePointer(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        // リサイズ時の再計算も不要になりましたが、念の為
+        window.addEventListener('resize', () => {
+            // changeChar(current); // CSS任せなので、これを呼ぶ必要すらなくなりました
+        });
 
         function loop() {
             const face = document.getElementById('face');
@@ -272,25 +400,32 @@
             const eyeR = document.getElementById('eyeR');
             const body = document.getElementById('body');
 
+            if (!face) return;
+
             const rect = face.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
+
+            // マウス位置との距離
             const dx = mouseX - cx;
             const dy = mouseY - cy;
             const conf = charData[current].config;
 
-            // 黒目の動きをさらに制限 (係数を 0.07 -> 0.02 に変更)
+            // 黒目の動き
             const ex = Math.max(-conf.eyeRangeX, Math.min(conf.eyeRangeX, dx * 0.02));
             const ey = Math.max(-conf.eyeRangeY, Math.min(conf.eyeRangeY, dy * 0.02));
 
             eyeL.style.transform = `translate(${ex}px, ${ey}px)`;
             eyeR.style.transform = `translate(${ex}px, ${ey}px)`;
 
+            // 顔と体の動き
+            // JSは「移動と回転」だけを担当し、サイズ拡大には関与しない
             face.style.transform = `translate(${dx * conf.speed}px, ${dy * conf.speed}px) rotate(${dx * conf.rotate}deg)`;
             body.style.transform = `translate(${dx * (conf.speed * 0.5)}px, ${dy * (conf.speed * 0.5)}px)`;
 
             requestAnimationFrame(loop);
         }
+
         changeChar('cat');
         loop();
     </script>
