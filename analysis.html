@@ -23,8 +23,16 @@
         <div class="heatmap-container">
             <div class="body-mini">
                 <div id="heat-head" class="heat-spot"></div>
+                <div id="heat-ear-r" class="heat-spot"></div>
+                <div id="heat-ear-l" class="heat-spot"></div>
+                <div id="heat-neck" class="heat-spot"></div>
+                <div id="heat-chest" class="heat-spot"></div>
                 <div id="heat-stomach" class="heat-spot"></div>
                 <div id="heat-back" class="heat-spot"></div>
+                <div id="heat-arm-r" class="heat-spot"></div>
+                <div id="heat-arm-l" class="heat-spot"></div>
+                <div id="heat-leg-r" class="heat-spot"></div>
+                <div id="heat-leg-l" class="heat-spot"></div>
             </div>
             <div class="analysis-summary">
                 <p>今週の集中ダメージエリア</p>
@@ -44,13 +52,17 @@
             <div class="sort-options">
                 <select id="part-filter" onchange="renderPosts()">
                     <option value="all">すべての部位</option>
-                    <option value="あたま">あたま</option>
-                    <option value="むね">むね</option>
-                    <option value="おなか">おなか</option>
-                    <option value="ひだりうで">ひだりうで</option>
-                    <option value="みぎうで">みぎうで</option>
-                    <option value="こし・せなか">こし・せなか</option>
-                    <option value="あし">あし</option>
+                    <option value="head">あたま</option>
+                    <option value="ear-r">みぎみみ</option>
+                    <option value="ear-l">ひだりみみ</option>
+                    <option value="neck">くび</option>
+                    <option value="chest">むね</option>
+                    <option value="stomach">おなか</option>
+                    <option value="arm-r">みぎうで</option>
+                    <option value="arm-l">ひだりうで</option>
+                    <option value="back">こし・せなか</option>
+                    <option value="leg-r">みぎあし</option>
+                    <option value="leg-l">ひだりあし</option>
                 </select>
                 <button onclick="changeSort('new')" id="sort-new" class="active">新着</button>
                 <button onclick="changeSort('popular')" id="sort-popular">人気</button>
@@ -68,18 +80,62 @@
                 <h3>✨ 知恵をシェアする</h3>
                 <p class="modal-sub">あなたの「これで楽になった！」を教えてね。</p>
 
+
                 <label for="post-part">部位</label>
                 <select id="post-part">
-                    <option value="あたま">あたま</option>
-                    <option value="むね">むね</option>
-                    <option value="おなか">おなか</option>
-                    <option value="うで">うで</option>
-                    <option value="あし">あし</option>
-                    <option value="こし・せなか">こし・せなか</option>
+                    <option value="all">すべての部位</option>
+                    <option value="head">あたま</option>
+                    <option value="ear-r">みぎみみ</option>
+                    <option value="ear-l">ひだりみみ</option>
+                    <option value="neck">くび</option>
+                    <option value="chest">むね</option>
+                    <option value="stomach">おなか</option>
+                    <option value="arm-r">みぎうで</option>
+                    <option value="arm-l">ひだりうで</option>
+                    <option value="back">こし・せなか</option>
+                    <option value="leg-r">みぎあし</option>
+                    <option value="leg-l">ひだりあし</option>
                 </select>
+
 
                 <label for="post-text">内容</label>
                 <textarea id="post-text" placeholder="例：20分おきに目を休めたら楽になったよ！"></textarea>
+
+
+                <label>写真をのせる（任意）</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="post-image-input" accept="image/*" onchange="previewPostImage(this)">
+                    <div id="image-preview-container" style="display:none; margin-top:10px;">
+                        <img id="post-image-preview" src=""
+                            style="width:100%; border-radius:10px; max-height:200px; object-fit:cover;">
+                        <button type="button" class="btn-cancel" onclick="clearPostImage()"
+                            style="padding:2px 10px; font-size:0.8rem;">画像を消す</button>
+                    </div>
+                </div>
+
+                <div class="avatar-selection-section">
+                    <label>アイコン</label>
+                    <input type="hidden" id="post-avatar-value" value="imgs/icons/1.png">
+                    <div id="avatar-modal-overlay" class="modal-overlay" style="display:none; z-index:2000;"
+                        onclick="closeAvatarModal()">
+                        <div class="modal-content" onclick="event.stopPropagation()">
+                            <h3>アイコンを選んでね</h3>
+                            <div class="avatar-grid">
+                                <img src="imgs/icons/1.png" onclick="selectAvatar('imgs/icons/1.png')">
+                                <img src="imgs/icons/2.png" onclick="selectAvatar('imgs/icons/2.png')">
+                                <img src="imgs/icons/3.png" onclick="selectAvatar('imgs/icons/3.png')">
+                                <img src="imgs/icons/4.png" onclick="selectAvatar('imgs/icons/4.png')">
+                                <img src="imgs/icons/5.png" onclick="selectAvatar('imgs/icons/5.png')">
+                            </div>
+                            <button class="btn-cancel" onclick="closeAvatarModal()">とじる</button>
+                        </div>
+                    </div>
+                    <div class="selected-avatar-display" onclick="openAvatarModal()">
+                        <img id="current-selected-icon-img" src="imgs/icons/16.png" width="50" height="auto">
+
+                    </div>
+                    <input type="hidden" id="post-avatar-value" value="imgs/avatar-bear.png">
+                </div>
 
                 <div class="modal-buttons">
                     <button class="btn-cancel" onclick="closeModal()">やめる</button>
@@ -97,7 +153,14 @@
         </nav>
     </footer>
 
-    <script src="js/script.js"></script>
+    <div id="success-toast" class="success-toast">
+        <div class="toast-content">
+            <span class="toast-icon">✨</span>
+            <p id="toast-message">投稿ありがとう！</p>
+            <img src="imgs/home-icon-box-2-bg-or.png" width="80">
+        </div>
+    </div>
+
     <script src="js/community.js"></script>
     <script>
         // ページ読み込み時に分析と描画を実行
@@ -106,6 +169,7 @@
             if (typeof renderPosts === 'function') renderPosts();
         };
     </script>
+
 </body>
 
 </html>
