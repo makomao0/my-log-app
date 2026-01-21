@@ -38,24 +38,49 @@
 }
 
 /* --- グラフ描画エリア --- */
+/* グラフ描画エリアのレイアウトを強制 */
 .chart-viewport {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-around;
-    /* 棒を均等に配置 */
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-around !important;
     height: 160px;
-    padding: 10px 5px;
-    gap: 2px;
-    /* 隙間を最小限に */
+    padding: 20px 10px;
+    background: #f8fafc;
+    /* 少し背景色をつけてエリアを明確に */
+    border-radius: 8px;
 }
 
 .chart-bar-group {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: center;
-    min-width: 0;
-    /* 幅が足りない時に縮小を許可 */
+    position: relative;
+    height: 100%;
+    /* 親の高さに合わせる */
+}
+
+.chart-bar {
+    width: 16px;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+}
+
+/* ツールチップのスタイル */
+.chart-tooltip-content {
+    background: #334155;
+    color: white;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 10px;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 100;
+    display: none;
+    pointer-events: none;
 }
 
 .chart-value {
@@ -70,11 +95,7 @@
     margin-top: 5px;
 }
 
-.chart-bar {
-    width: 12px;
-    /* 棒を少し細くして余白を作る */
-    border-radius: 2px 2px 0 0;
-}
+
 
 /* --- 履歴テーブルエリア --- */
 #history-list {
@@ -132,4 +153,28 @@
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     opacity: 1 !important;
     /* 赤い時は常にハッキリ見せる */
+}
+
+/* 記録回数ボタンのスタイル */
+.time-detail-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 0.85em;
+    color: #475569;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.time-detail-btn:hover {
+    background: #e2e8f0;
+}
+
+/* モーダル内のリスト用 */
+#custom-modal ul li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+    font-weight: bold;
+    color: #334155;
 }
