@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3匹のセレクトページ - 修正完了版</title>
+    <title>3匹のセレクトページ - 着せ替え統合版</title>
     <style>
         body {
             margin: 0;
@@ -75,17 +75,10 @@
             pointer-events: none;
         }
 
-        .nav-bar :hover {
-            background: #f5f5f5;
-            transform: scale(1.01);
-            transition: 0.5s;
-        }
-
         /* --- ステージ（背景） --- */
         #stage {
             width: 100%;
             height: calc(100vh - 180px);
-            /* 上下のメニュー分を引く */
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -96,70 +89,70 @@
             background-position: center bottom;
             background-color: #f7e1c3;
             background-size: auto 100%;
-            /* 基本は高さに合わせる */
-
             touch-action: none;
             user-select: none;
             overflow: hidden;
-            /* はみ出した拡大背景を隠す */
         }
 
         /* --- キャラクターコンテナ --- */
         #character {
             position: relative;
-            /* サイズは固定値で作る（これが一番崩れない） */
             width: 400px;
             height: 340px;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 5;
-
-            /* 基準点を「下」にする（拡大した時に足が浮かないように） */
             transform-origin: center bottom;
             transition: transform 0.3s ease;
-            /* 切り替え時のアニメーション */
         }
 
-        /* パーツ共通 */
         .part {
             position: absolute;
             width: 350px;
-            /* ここも固定値 */
             height: 350px;
-            /* ここも固定値 */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             pointer-events: none;
-            /* マウスイベントを透過 */
         }
 
-        /* 体と顔の位置合わせ */
         #body {
             z-index: 1;
             bottom: 0;
-            /* 下揃え */
         }
 
         #face {
             z-index: 2;
             top: 0;
-            /* 上揃え */
-            /* 顔と体が350pxの正方形の中で重なるように作られている前提 */
+        }
+
+        /* 着せ替えアイテム用レイヤー */
+        #equipped-item {
+            z-index: 10;
+            position: absolute;
+            /* 絶対配置 */
+            top: 0;
+            left: 0;
+            width: 350px;
+            height: 350px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            pointer-events: none;
+            /* transitionを入れると着替えた時にふわっと動きます（お好みで） */
+            transition: transform 0.2s ease-out;
         }
 
         /* --- 目 --- */
         .eye-container {
             position: absolute;
             top: 70%;
-            /* 顔の中での相対位置 */
             width: 100%;
             display: flex;
             justify-content: center;
             gap: 50px;
             z-index: 3;
-            transform: rotate(-8deg);
         }
 
         .eye-wrap {
@@ -183,41 +176,14 @@
             position: absolute;
         }
 
-        /* --- スマホ用調整（CSSのみで制御！） --- */
         @media (max-width: 480px) {
-
-            /* キャラクターをCSSで「ズーム」する */
             #character {
                 transform: scale(1.3);
-                /* 1.3倍に拡大表示 */
             }
 
-            /* 背景も少しズームして迫力を出す */
             #stage {
                 background-size: auto 120%;
                 background-position: center 80%;
-            }
-
-            .menu {
-                transform: scale(0.9);
-                gap: 5px;
-            }
-
-            button {
-                padding: 10px 15px;
-                font-size: 12px;
-            }
-
-            footer {
-                height: 130px;
-            }
-
-            .nav-bar {
-                height: 130px;
-            }
-
-            .nav-bar img {
-                width: 100px;
             }
         }
     </style>
@@ -225,16 +191,18 @@
 
 <body>
     <main>
-
         <div id="stage">
             <div class="menu">
                 <button onclick="changeChar('cat')" id="btn-cat" class="active">ネコのお部屋</button>
                 <button onclick="changeChar('bird')" id="btn-bird">トリの大空</button>
                 <button onclick="changeChar('sheep')" id="btn-sheep">ヒツジの草原</button>
             </div>
+
             <div id="character">
                 <div class="part" id="body"></div>
                 <div class="part" id="face">
+                    <div id="equipped-item" class="part"></div>
+
                     <div class="eye-container">
                         <div class="eye-wrap">
                             <div class="eye-ball" id="eyeL"></div>
@@ -245,12 +213,30 @@
                     </div>
                 </div>
             </div>
+
+            <div class="menu" style="margin-bottom: 110px;">
+                <button onclick="openCloset()" style="background: #ffeb3b; color: #333;">👗 きせかえをする</button>
+            </div>
         </div>
     </main>
 
+    <div id="closet-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;"
+        onclick="closeCloset()">
+        <div style="background:white; padding:20px; border-radius:20px; width:85%; max-width:400px;"
+            onclick="event.stopPropagation()">
+            <h3 style="margin-top:0;">ログちゃんのクローゼット</h3>
+            <p style="font-size: 14px;">所持ポイント: <span id="user-points"
+                    style="font-weight:bold; color: #fb8c00;">0</span> pt</p>
+            <div id="item-shop"
+                style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;"></div>
+            <button onclick="closeCloset()" style="width:100%; background:#eee;">とじる</button>
+        </div>
+    </div>
+
     <footer>
         <nav class="nav-bar">
-            <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+            <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt=""></a>
             <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
             <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
         </nav>
@@ -265,167 +251,203 @@
                 bg: 'imgs/character/room.png',
                 body: 'imgs/character/cat_body.png',
                 face: 'imgs/character/cat_face.png',
-                config: {
-                    isCircle: false,
-                    speed: 0.05,
-                    eyeRangeX: 8,
-                    eyeRangeY: 4,
-                    rotate: 0.03,
-                    eyeTop: '42%',
-                    eyeGap: '45px',
-                    eyeRotate: '-8deg',
-                    eyeSize: 1,
-                    bodyZ: 1,
-                }
+                config: { isCircle: false, speed: 0.05, eyeRangeX: 8, eyeRangeY: 4, rotate: 0.03, eyeTop: '42%', eyeGap: '45px', eyeRotate: '-8deg', eyeSize: 1, bodyZ: 1 }
             },
             bird: {
                 bg: 'imgs/character/sky.png',
                 body: 'imgs/character/bird_body.png',
                 face: 'imgs/character/bird_face.png',
-                config: {
-                    isCircle: true,
-                    isSingleEye: true, // ★ここを追加
-                    speed: 0.1,
-                    eyeRangeX: 10,
-                    eyeRangeY: 10,
-                    rotate: 0.08,
-                    eyeTop: '33%',
-                    eyeGap: '100px',
-                    eyePaddingLeft: '40px', /* ★ここで右に寄せる距離を調整 */
-                    ballSize: 1.8,    /* ★黒目だけの大きさをここで調整（1.0が標準） */
-                    eyeRotate: '0deg',
-                    eyeSize: 1,
-                    bodyZ: 1
-                }
+                config: { isCircle: true, isSingleEye: true, speed: 0.1, eyeRangeX: 10, eyeRangeY: 10, rotate: 0.08, eyeTop: '33%', eyeGap: '100px', eyePaddingLeft: '40px', ballSize: 1.8, eyeRotate: '0deg', eyeSize: 1, bodyZ: 1 }
             },
             sheep: {
                 bg: 'imgs/character/meadow.png',
                 body: 'imgs/character/sheep_body.png',
                 face: 'imgs/character/sheep_face.png',
-                config: {
-                    isCircle: false,
-                    speed: 0.02,
-                    eyeRangeX: 5,
-                    eyeRangeY: 5,
-                    rotate: 0.01,
-                    eyeTop: '40%',
-                    eyeGap: '45px',
-                    eyeRotate: '-4deg',
-                    eyeSize: 0.78,
-                    bodyZ: 3,
-                }
+                config: { isCircle: false, speed: 0.02, eyeRangeX: 5, eyeRangeY: 5, rotate: 0.01, eyeTop: '40%', eyeGap: '45px', eyeRotate: '-4deg', eyeSize: 0.78, bodyZ: 3 }
             }
         };
 
+        // 着せ替えデータ
+        const CLOSET_ITEMS = [
+            {
+                id: 'hat_basic',
+                name: 'ぼうし',
+                price: 50,
+                img: 'imgs/character/hat.png',
+                // ★ 追加：微調整用
+                offsetY: '-50px', // 上にずらす
+                offsetX: '0px',
+                scale: '0.6'      // 少し大きく
+            },
+            {
+                id: 'ribbon_red',
+                name: 'リボン',
+                price: 30,
+                img: 'imgs/items/ribbon.png',
+                offsetY: '20px',
+                offsetX: '40px',
+                scale: '0.8'
+            },
+            {
+                id: 'megane',
+                name: 'メガネ',
+                price: 40,
+                img: 'imgs/items/glasses.png',
+                offsetY: '10px',
+                offsetX: '0px',
+                scale: '0.9'
+            }
+        ];
+
+        let userPoints = parseInt(localStorage.getItem('log_points') || '100');
+        let ownedItems = JSON.parse(localStorage.getItem('owned_items') || '[]');
+        let equippedData = JSON.parse(localStorage.getItem('equipped_data') || '{"cat":"","bird":"","sheep":""}');
+
+        // キャラクター変更
         function changeChar(id) {
             current = id;
             const data = charData[id];
             const conf = data.config;
 
-            // ★修正ポイント：ここでのサイズ変更（scaleFactor計算）を全部消しました！
-            // サイズはCSSの zoom / scale にお任せします。
-
             document.getElementById('stage').style.backgroundImage = `url(${data.bg})`;
             document.getElementById('body').style.backgroundImage = `url(${data.body})`;
             document.getElementById('face').style.backgroundImage = `url(${data.face})`;
-
             document.getElementById('body').style.zIndex = conf.bodyZ;
 
             const container = document.querySelector('.eye-container');
             container.style.top = conf.eyeTop;
-            container.style.gap = conf.eyeGap; // 元の値をそのまま使う
+            container.style.gap = conf.eyeGap;
             container.style.transform = `rotate(${conf.eyeRotate})`;
-
             container.style.paddingLeft = conf.eyePaddingLeft || '0px';
 
             const eyeWraps = document.querySelectorAll('.eye-wrap');
             const eyeBalls = [document.getElementById('eyeL'), document.getElementById('eyeR')];
+
             eyeWraps.forEach((wrap, index) => {
                 const ball = eyeBalls[index];
                 const s = conf.eyeSize;
-                const bs = conf.ballSize || 1.0; // 設定がない場合は1倍にする
+                const bs = conf.ballSize || 1.0;
 
-                if (conf.isSingleEye && index === 1) {
-                    wrap.style.display = 'none';
-                } else {
-                    wrap.style.display = 'flex';
-                }
+                wrap.style.display = (conf.isSingleEye && index === 1) ? 'none' : 'flex';
 
                 if (conf.isCircle) {
-                    // 白目のサイズ
-                    wrap.style.width = (60 * s) + 'px';
-                    wrap.style.height = (60 * s) + 'px';
-                    // 黒目のサイズ（bsを掛ける）
-                    ball.style.width = (30 * s * bs) + 'px';
-                    ball.style.height = (30 * s * bs) + 'px';
+                    wrap.style.width = wrap.style.height = (60 * s) + 'px';
+                    ball.style.width = ball.style.height = (30 * s * bs) + 'px';
                 } else {
-                    // 白目のサイズ
-                    wrap.style.width = (80 * s) + 'px';
-                    wrap.style.height = (30 * s) + 'px';
-                    // 黒目のサイズ（bsを掛ける）
-                    ball.style.width = (70 * s * bs) + 'px';
-                    ball.style.height = (30 * s * bs) + 'px';
+                    wrap.style.width = (80 * s) + 'px'; wrap.style.height = (30 * s) + 'px';
+                    ball.style.width = (70 * s * bs) + 'px'; ball.style.height = (30 * s * bs) + 'px';
                 }
             });
 
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + id).classList.add('active');
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-' + id);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            updateEquipDisplay(); // 装備の見た目を更新
         }
 
-        // --- 動きのループ処理 ---
-        function updatePointer(x, y) {
-            mouseX = x;
-            mouseY = y;
+        // --- 着せ替えロジック ---
+        function openCloset() {
+            document.getElementById('closet-modal').style.display = 'flex';
+            renderCloset();
         }
 
-        window.addEventListener('mousemove', (e) => {
-            updatePointer(e.clientX, e.clientY);
-        });
-        window.addEventListener('touchmove', (e) => {
-            if (e.target.closest('#stage')) {
-                // e.preventDefault(); 
+        function closeCloset() {
+            document.getElementById('closet-modal').style.display = 'none';
+        }
+
+        function renderCloset() {
+            const shop = document.getElementById('item-shop');
+            document.getElementById('user-points').innerText = userPoints;
+            shop.innerHTML = CLOSET_ITEMS.map(item => {
+                const isOwned = ownedItems.includes(item.id);
+                const isEquipped = equippedData[current] === item.img;
+                return `
+                    <div style="text-align:center; border:1px solid #ddd; padding:8px; border-radius:12px; background:${isEquipped ? '#fff3e0' : 'white'}; border-color:${isEquipped ? '#ff6b6b' : '#ddd'}">
+                        <img src="${item.img}" style="width:100%; height:40px; object-fit:contain; margin-bottom:5px;">
+                        <div style="font-size:10px; margin-bottom:5px;">${item.name}</div>
+                        ${isOwned ?
+                        `<button onclick="equipItem('${item.img}')" style="font-size:10px; padding:4px 8px; width:100%; border-radius:10px; background:${isEquipped ? '#ff6b6b' : '#eee'}; color:${isEquipped ? 'white' : '#333'}">${isEquipped ? '脱ぐ' : '着る'}</button>` :
+                        `<button onclick="buyItem('${item.id}', ${item.price})" style="font-size:10px; padding:4px 8px; width:100%; border-radius:10px; background:#4caf50; color:white;">${item.price}pt</button>`
+                    }
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function buyItem(id, price) {
+            if (userPoints >= price) {
+                userPoints -= price;
+                ownedItems.push(id);
+                localStorage.setItem('log_points', userPoints);
+                localStorage.setItem('owned_items', JSON.stringify(ownedItems));
+                renderCloset();
+            } else { alert("ポイントが足りないよ！"); }
+        }
+
+        function equipItem(imgSrc) {
+            equippedData[current] = (equippedData[current] === imgSrc) ? "" : imgSrc;
+            localStorage.setItem('equipped_data', JSON.stringify(equippedData));
+            updateEquipDisplay();
+            renderCloset();
+        }
+
+        function updateEquipDisplay() {
+            const itemLayer = document.getElementById('equipped-item');
+            const currentImg = equippedData[current];
+
+            if (currentImg) {
+                // 現在装備しているアイテムの情報をCLOSET_ITEMSから探す
+                const itemInfo = CLOSET_ITEMS.find(item => item.img === currentImg);
+
+                itemLayer.style.backgroundImage = `url(${currentImg})`;
+                itemLayer.style.display = 'block';
+
+                if (itemInfo) {
+                    // 微調整データを反映させる
+                    // scaleは「大きさ」、translateは「位置」
+                    itemLayer.style.transform = `
+                translate(${itemInfo.offsetX || '0px'}, ${itemInfo.offsetY || '0px'}) 
+                scale(${itemInfo.scale || '1'})
+            `;
+                }
+            } else {
+                itemLayer.style.display = 'none';
             }
-            const touch = e.touches[0];
-            updatePointer(touch.clientX, touch.clientY);
-        }, { passive: true });
-
-        // リサイズ時の再計算も不要になりましたが、念の為
-        window.addEventListener('resize', () => {
-            // changeChar(current); // CSS任せなので、これを呼ぶ必要すらなくなりました
-        });
-
+        }
+        // --- アニメーションループ ---
         function loop() {
             const face = document.getElementById('face');
             const eyeL = document.getElementById('eyeL');
             const eyeR = document.getElementById('eyeR');
             const body = document.getElementById('body');
-
             if (!face) return;
 
             const rect = face.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
-
-            // マウス位置との距離
             const dx = mouseX - cx;
             const dy = mouseY - cy;
             const conf = charData[current].config;
 
-            // 黒目の動き
             const ex = Math.max(-conf.eyeRangeX, Math.min(conf.eyeRangeX, dx * 0.02));
             const ey = Math.max(-conf.eyeRangeY, Math.min(conf.eyeRangeY, dy * 0.02));
-
             eyeL.style.transform = `translate(${ex}px, ${ey}px)`;
             eyeR.style.transform = `translate(${ex}px, ${ey}px)`;
 
-            // 顔と体の動き
-            // JSは「移動と回転」だけを担当し、サイズ拡大には関与しない
             face.style.transform = `translate(${dx * conf.speed}px, ${dy * conf.speed}px) rotate(${dx * conf.rotate}deg)`;
             body.style.transform = `translate(${dx * (conf.speed * 0.5)}px, ${dy * (conf.speed * 0.5)}px)`;
 
             requestAnimationFrame(loop);
         }
 
+        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+        window.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            mouseX = touch.clientX; mouseY = touch.clientY;
+        }, { passive: true });
+
+        // 初期化
         changeChar('cat');
         loop();
     </script>
