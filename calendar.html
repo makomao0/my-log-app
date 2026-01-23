@@ -4,43 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>カレンダー - カラダのログちゃん</title>
-
-    <link rel="stylesheet" href="./css/action-style.css">
+    <title>co:me-カレンダー</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/calendar-style.css">
     <link rel="icon" href="images/my-icon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
+
+
     <header class="header">
         <p>傾向カレンダー</p>
     </header>
+
     <main>
         <div class="container">
-            <div class="calendar-header">
-                <button onclick="changeMonth(-1)">◀</button>
-                <h2 id="current-month">2024年1月</h2>
-                <button onclick="changeMonth(1)">▶</button>
+            <div class="calendar-bg">
+                <div class="calendar-header">
+                    <button onclick="changeMonth(-1)">◀</button>
+                    <h2 id="current-month">2024年1月</h2>
+                    <button onclick="changeMonth(1)">▶</button>
+                </div>
+                <div class="weekdays">
+                    <div>日</div>
+                    <div>月</div>
+                    <div>火</div>
+                    <div>水</div>
+                    <div>木</div>
+                    <div>金</div>
+                    <div>土</div>
+                </div>
+
+                <div id="calendar-grid" class="calendar-grid"></div>
             </div>
-            <div class="weekdays">
-                <div>日</div>
-                <div>月</div>
-                <div>火</div>
-                <div>水</div>
-                <div>木</div>
-                <div>金</div>
-                <div>土</div>
+
+            <div class="history-container" style="margin-top: 30px;">
+                <div id="chart-link-container"></div>
+                <h2 id="selected-date-label" style="font-size: 1.2em; color: #55bbbf;">🏥 日別の記録</h2>
+
+                <div id="history-list">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>部位</th>
+                                <th>記録された回数</th>
+                                <th style="text-align: right;">合計Lv</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
-            <div id="calendar-grid" class="calendar-grid"></div>
-            <div id="event-list-container" class="event-list-area"></div>
         </div>
-
-
     </main>
 
     <footer>
         <nav class="nav-bar">
-            <a href="index.html" class="nav-item active"><img src="imgs/top-icon-home.png" alt=""></a>
+            <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt=""></a>
             <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
             <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
         </nav>
