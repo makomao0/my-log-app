@@ -4,8 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3匹のセレクトページ - 着せ替え統合版</title>
+    <title>co:me着せ替え</title>
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+
+
     <style>
+        * {
+            font-family: "Kosugi Maru", sans-serif !important;
+        }
+
+        /* アプリ内のすべての要素に Kiwi Maru を適用 */
+        /* ボタン、入力欄、セレクトボックスにも適用 */
+        button,
+        input,
+        select,
+        textarea {
+            font-family: "Kosugi Maru", sans-serif;
+        }
+
         body {
             margin: 0;
             overflow: hidden;
@@ -275,27 +295,27 @@
                 price: 50,
                 img: 'imgs/character/hat.png',
                 // ★ 追加：微調整用
-                offsetY: '-50px', // 上にずらす
+                offsetY: '-60px', // 上にずらす
                 offsetX: '0px',
-                scale: '0.6'      // 少し大きく
+                scale: '0.5'      // 少し大きく
             },
             {
                 id: 'ribbon_red',
                 name: 'リボン',
                 price: 30,
-                img: 'imgs/items/ribbon.png',
-                offsetY: '20px',
+                img: 'imgs/character/ribbon.png',
+                offsetY: '-10px',
                 offsetX: '40px',
                 scale: '0.8'
             },
             {
                 id: 'megane',
                 name: 'メガネ',
-                price: 40,
-                img: 'imgs/items/glasses.png',
+                price: 10,
+                img: 'imgs/character/glasses.png',
                 offsetY: '10px',
                 offsetX: '0px',
-                scale: '0.9'
+                scale: '0.5'
             }
         ];
 
