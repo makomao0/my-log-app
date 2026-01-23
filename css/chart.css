@@ -7,6 +7,21 @@
     --chart-border: rgba(0, 0, 0, 0.1);
 }
 
+* {
+    font-family: "Kosugi Maru", sans-serif !important;
+}
+
+/* アプリ内のすべての要素に Kiwi Maru を適用 */
+/* ボタン、入力欄、セレクトボックスにも適用 */
+button,
+input,
+select,
+textarea {
+    font-family: "Kosugi Maru", sans-serif;
+}
+
+
+
 /* --- チャートコンテナ --- */
 .chart-section {
     background: var(--chart-bg);
@@ -66,6 +81,18 @@
     transition: all 0.3s ease;
 }
 
+/* グラフの棒に触れた時の演出 */
+.chart-bar:hover {
+    filter: brightness(0.9);
+    /* 少し暗くする */
+    cursor: pointer;
+}
+
+/* ツールチップを表示する指示（JSと連動） */
+.chart-bar-group:hover .chart-tooltip-content {
+    display: block;
+}
+
 /* ツールチップのスタイル */
 .chart-tooltip-content {
     background: #334155;
@@ -100,8 +127,9 @@
 /* --- 履歴テーブルエリア --- */
 #history-list {
     height: 380px;
-    /* 固定高さを指定 */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* iOSでの慣性スクロールを有効化 */
     border: 1px solid var(--chart-grid);
     border-radius: 12px;
     background: #fff;
