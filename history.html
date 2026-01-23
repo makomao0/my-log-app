@@ -4,10 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お薬手帳 - 痛みログ</title>
+    <title>co:me-処方箋箋</title>
 
     <link rel="stylesheet" href="./css/chart.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+
 
     <style>
         /* 下部ナビゲーション */
@@ -51,6 +55,21 @@
     <main>
         <div class="history-container">
             <h2>🏥 お薬手帳（痛みログ）</h2>
+            <div style="text-align: center;">
+                <button onclick="viewDate = new Date(); updateDisplay();"
+                    style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;">
+                    今日に戻る
+                </button>
+            </div>
+            <div class="date-controller"
+                style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0;">
+                <button onclick="changeDate(-1)"
+                    style="background:none; border:none; font-size: 20px; cursor:pointer;">◀</button>
+                <h3 id="current-display-date" style="margin: 0; color: #55bbbf;">2024/01/22</h3>
+                <button onclick="changeDate(1)"
+                    style="background:none; border:none; font-size: 20px; cursor:pointer;">▶</button>
+            </div>
+
             <p class="history-desc">これまでの記録を先生に見せてね！</p>
 
             <div id="damage-chart-root" class="chart-section">
@@ -69,17 +88,17 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     </main>
 
     <footer>
         <nav class="nav-bar">
-            <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt="ホーム"></a>
-            <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt="カレンダー"></a>
-            <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt="ゲーム"></a>
+            <a href="index.html" class="nav-item"><img src="imgs/top-icon-home.png" alt=""></a>
+            <a href="calendar.html" class="nav-item"><img src="imgs/top-icon-calendar.png" alt=""></a>
+            <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
         </nav>
     </footer>
-
     <script src="js/chart.js"></script>
 </body>
 
