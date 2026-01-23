@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,11 +105,8 @@
             <a href="puzzle.html" class="nav-item"><img src="imgs/top-icon-game.png" alt=""></a>
         </nav>
     </footer>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
+
+
     <script src="js/script.js"></script>
 </body>
 
