@@ -241,7 +241,6 @@ function resetToToday() {
 // ==========================================
 
 function updateVisualization() {
-    const dateStrCompare = viewingDate.toLocaleDateString();
     const dateDisplay = document.getElementById("current-date-display");
     if (dateDisplay) {
         const y = viewingDate.getFullYear();
@@ -250,11 +249,11 @@ function updateVisualization() {
         dateDisplay.innerText = `${y}/${m}/${d}`;
     }
 
-    // リセット
+    // --- 1. 全エリアのリセット ---
     document.querySelectorAll('.touch-area').forEach(a => {
         a.style.backgroundColor = 'transparent';
         a.style.boxShadow = 'none';
-        a.style.filter = 'none'; // 一旦リセット
+        a.style.filter = 'none';
     });
 
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -274,37 +273,37 @@ function updateVisualization() {
             }
         }
     });
+
+    // --- 2. ヒートマップの適用 ---
     for (let part in summary) {
         const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
         if (targetEl) {
             const damage = summary[part];
-            const opacity = Math.max(0.4, Math.min(damage / 40, 0.8));
 
-            // ぼかしの強さをダメージに連動させる
-            const blurValue = Math.min(damage / 2, 15);
+            // 【調整】100ダメージで最大になるように設定
+            const intensity = Math.min(damage / 10000, 1.0);
+            const opacity = 0.4 + (intensity * 0.4); // 0.4〜0.8
+            const blurSize = 5 + (intensity * 15);   // 5px〜20px
 
-            targetEl.style.backgroundColor = `rgba(255, 60, 0, ${opacity})`;
+            // 背景色
+            targetEl.style.backgroundColor = `rgba(255, 69, 0, ${opacity})`;
 
-            // box-shadow を重ねて「ボワッ」とした光を作る
-            targetEl.style.boxShadow = `0 0 ${blurValue * 2}px ${blurValue}px rgba(255, 100, 0, ${opacity})`;
+            // 外側の光（これが「ボワッ」とした質感を出す）
+            targetEl.style.boxShadow = `0 0 ${blurSize}px ${blurSize / 2}px rgba(255, 140, 0, ${opacity})`;
 
-            // filter の blur は控えめに（2px〜4px程度）
-            targetEl.style.filter = `blur(${Math.max(2, blurValue / 3)}px)`;
+            // 全体のぼかし（これが反映されない場合、親要素の overflow: hidden を疑う）
+            targetEl.style.filter = `blur(${Math.max(2, blurSize / 3)}px)`;
+
+            // 【重要】z-indexを上げて他の要素に消されないようにする
+            targetEl.style.zIndex = "100";
         }
     }
 
     const targetPartEl = document.getElementById('target-part');
     if (targetPartEl) {
-        // hasLogForThisDay に名前を合わせる
         targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
     }
 }
-
-
-
-
-
-
 
 
 function showTapEffect(e, partName) {
