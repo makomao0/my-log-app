@@ -261,6 +261,28 @@ function updateVisualization() {
         }
     });
 
+    // 反映（文字なし・オレンジ・ぼかしデザイン）
+    for (let part in summary) {
+        const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
+        if (targetEl) {
+            const damage = summary[part];
+            const opacity = Math.max(0.3, Math.min(damage / 100, 0.8));
+            const blurSize = Math.max(15, Math.min(damage / 2, 40)); // 痛みで光の広がりを変える
+
+            // 文字（spanタグなど）を完全に非表示にする
+            const label = targetEl.querySelector('span');
+            if (label) label.style.display = 'none';
+
+            // 枠線を消し、オレンジの光を設定
+            targetEl.style.border = 'none';
+            targetEl.style.backgroundColor = `rgba(255, 120, 0, ${opacity})`;
+
+            // じわっとした熱源のような表現
+            targetEl.style.boxShadow = `0 0 ${blurSize}px ${blurSize / 2}px rgba(255, 140, 0, ${opacity * 0.7})`;
+            targetEl.style.filter = 'blur(6px)'; // ぼかしを少し強めて境界をなくす
+        }
+    }
+
     // 4. メッセージ更新
     const targetPartEl = document.getElementById('target-part');
     if (targetPartEl) {
@@ -660,9 +682,14 @@ document.addEventListener('DOMContentLoaded', () => {
             countUpAtLocation(partName, e);
 
             // ぷるん！
-            area.style.transition = 'transform 0.1s';
-            area.style.transform = 'scale(1.1)';
-            setTimeout(() => area.style.transform = 'scale(1.0)', 100);
+            area.style.transition = 'none';
+            area.style.backgroundColor = 'rgba(255, 200, 0, 0.12)'; // 押した瞬間だけ明るい黄色に
+            area.style.transform = 'scale(1.2)';
+
+            setTimeout(() => {
+                area.style.transition = 'all 0.4s ease';
+                updateVisualization(); // 自動的にヒートマップのオレンジに戻る
+            }, 100);
         }
     });
 });
