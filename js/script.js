@@ -3,10 +3,15 @@
 // ==========================================
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
-let viewingDate = new Date();
-let displayDate = new Date();
-let isBackView = false;
+let sessionLogs = {};
+let viewingDate = new Date(); // ホーム画面用
+let displayDate = new Date(); // カレンダー画面用
 
+
+
+// ==========================================
+// 4. アクション・詳細表示（action.html用）
+// ==========================================
 
 
 // 1. データの定義（マップ用とウェブ検索用を分ける）
@@ -106,9 +111,7 @@ function showDetail(type) {
     modal.style.display = 'block';
 }
 
-// ==========================================
-// 2. 検索・詳細表示
-// ==========================================
+// 3. 検索実行用関数
 function openGoogleMap(query) {
     // 正しいGoogleマップ検索URL
     const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -116,6 +119,7 @@ function openGoogleMap(query) {
 }
 
 function openGoogleSearch(query) {
+    // Google検索URL
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     window.open(searchUrl, '_blank');
 }
@@ -132,11 +136,18 @@ function closeDetail() {
 
 function init() {
     displayPoints();
+
+    // 全ページ共通
     checkHomeNotifications();
 
-    // ページごとの判定
+    // ホーム画面用 (人体シルエットがある場合)
     if (document.getElementById('current-date-display')) {
         updateVisualization();
+        const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const total = logs.reduce((sum, log) => sum + (log.totalLevel || 0), 0);
+        const lvEl = document.getElementById('lv');
+        if (lvEl) lvEl.innerText = total;
+        updateFace(total);
     }
     if (document.getElementById('history-body')) {
         renderHistory();
