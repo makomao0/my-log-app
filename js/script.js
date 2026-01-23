@@ -1,132 +1,70 @@
-
 // ==========================================
 // 1. 基本設定とデータ
 // ==========================================
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
-let sessionLogs = {};
-let viewingDate = new Date(); // 現在表示・選択している日付
-let currentTopPart = "all";
-
-const HEALTH_DATABASE = {
-    'あたま': { title: '緊張型頭痛（かも？）', text: '首や肩のコリ、ストレスが原因かもしれません。目を休めて温めてみて。', search: '近くの脳神経外科 内科' },
-    'おなか': { title: '消化不良・腹痛（かも？）', text: 'お腹を温めて、消化に良いうどんやお粥を食べましょう。', search: '近くの消化器内科' },
-    'こし・せなか': { title: '筋肉の疲れ（かも？）', text: '同じ姿勢が続いていませんか？軽いストレッチが効果等。', search: '近くの整形外科' },
-    'みみ': { title: '耳の違和感（かも？）', text: '耳鳴りや詰まった感じはありませんか？気圧の変化や疲れでも。', search: '近くの耳鼻咽喉科' },
-    'みぎみみ': { title: '右耳の違和感', text: '耳を触りすぎていませんか？静かな場所で休みましょう。', search: '近くの耳鼻咽喉科' },
-    'ひだりみみ': { title: '左耳の違和感', text: '疲れが溜まっているサインかも。', search: '近くの耳鼻咽喉科' },
-    'くび': { title: '首のコリ・痛み（かも？）', text: 'スマホを長時間見ていませんか？', search: '近くの整形外科' },
-    'むね': { title: '胸の痛み・動悸（かも？）', text: 'ストレスや胃酸の逆流の可能性も。', search: '近くの循環器内科' },
-    'うで': { title: '腕のだるさ・疲れ（かも？）', text: '手首を回して筋肉をほぐしましょう。', search: '近くの整形外科' },
-    'あし': { title: '足の疲れ・むくみ（かも？）', text: '足を高くして寝てみて。', search: '近くの整形外科' }
-};
-// ==========================================
-// 2. 分析機能（analysis.html用）
-// ==========================================
-function renderAnalysis() {
-    console.log("分析を開始します...");
-    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const resultTitle = document.getElementById('type-result');
-    const adviceText = document.getElementById('advice-text');
-    const topPartName = document.getElementById('top-part-name');
-
-    if (!logs || logs.length === 0) {
-        if (resultTitle) resultTitle.innerText = "データ収集中";
-        if (adviceText) adviceText.innerText = "ホームで体をタップして記録してね！";
-        if (topPartName) topPartName.innerText = "なし";
-        return;
-    }
-
-    // 集計
-    const totals = {};
-    logs.forEach(l => {
-        for (let p in l.details) totals[p] = (totals[p] || 0) + l.details[p];
-    });
-
-    // 最大部位の特定
-    currentTopPart = Object.keys(totals).reduce((a, b) => totals[a] > totals[b] ? a : b);
-
-    // UI更新
-    if (topPartName) topPartName.innerText = currentTopPart;
-    const guide = HEALTH_DATABASE[currentTopPart];
-    if (guide) {
-        if (resultTitle) resultTitle.innerText = guide.title;
-        if (adviceText) adviceText.innerHTML = guide.text;
-    }
-
-    // ヒートマップ
-    const idMap = { 'あたま': 'heat-head', 'おなか': 'heat-stomach', 'こし・せなか': 'heat-back' };
-    document.querySelectorAll('.heat-spot').forEach(s => s.style.display = 'none');
-    const spotId = idMap[currentTopPart];
-    if (spotId && document.getElementById(spotId)) {
-        document.getElementById(spotId).style.display = 'block';
-    }
-}
-
-// 分析から知恵袋へ
-function goToSolutions() {
-    const filter = document.getElementById('part-filter');
-    if (filter) {
-        filter.value = currentTopPart === "all" ? "all" : currentTopPart;
-        renderPosts();
-        filter.scrollIntoView({ behavior: 'smooth' });
-    }
-}
+let viewingDate = new Date();
+let displayDate = new Date();
+let isBackView = false;
 
 
 
-// ==========================================
-// 3. 知恵袋機能（analysis.html / community.html用）
-// ==========================================
-function renderPosts() {
-    const list = document.getElementById('post-list');
-    if (!list) return;
-
-    const filter = document.getElementById('part-filter').value;
-    const posts = JSON.parse(localStorage.getItem('community_posts') || '[]');
-
-    const filtered = filter === 'all' ? posts : posts.filter(p => p.part === filter);
-
-    list.innerHTML = filtered.reverse().map(p => `
-        <div class="post-card">
-            <div class="post-header">
-                <span class="post-tag">#${p.part}</span>
-                <span class="post-date">${new Date().toLocaleDateString()}</span>
-            </div>
-            <p>${p.text}</p>
-        </div>
-    `).join('') || '<p style="text-align:center; padding:20px;">まだ投稿がありません。</p>';
-}
-
-
-
-
-
-
-
-// ==========================================
-// 4. アクション・詳細表示（action.html用）
-// ==========================================
-
-
+// 1. データの定義（マップ用とウェブ検索用を分ける）
 const MEDICAL_GUIDE = {
     '薬': {
         title: 'お薬のアドバイス',
         text: '用法用量を守って飲みましょう。お薬手帳を持って医師に相談するのが一番安心です。',
-        search: '近くのドラッグストア'
+        mapSearch: '近くのドラッグストア',
+        webSearch: '市販薬 飲み合わせ 注意'
     },
     '病院': {
         title: '受診の目安',
         text: '「いつもと違う痛み」や「強い痛み」がある場合は、早めに受診しましょう。何科か迷う場合は、まずは内科や整形外科へ。',
-        search: '近くの総合病院'
+        mapSearch: '近くの総合病院',
+        webSearch: '症状から何科か調べる'
     },
-    '冷やす': { title: '冷やす', text: 'ズキズキ痛む時や熱がある時は、保冷剤をタオルで巻いて当ててみて。' },
-    '温める': { title: '温める', text: 'お腹が痛い時や筋肉が凝っている時は、ゆっくりお風呂に浸かって温めよう。' },
-    '休む': { title: '休む', text: '一番の薬は睡眠です。スマホを置いて、暗い部屋でゆっくり休みましょう。' },
-    '水分': { title: '水分補給', text: '一度にたくさん飲まず、こまめに少しずつ常温の水を飲みましょう。' },
-    '呼吸': { title: 'リラックス呼吸', text: '鼻から吸って、口からゆっくり吐く。5回繰り返すと落ち着くよ。' },
-    '食事': { title: '食事のアドバイス', text: '消化に良いうどんやお粥を選ぼう。刺激物は控えめに。' },
-    '相談': { title: '相談しよう', text: '一人で抱え込まず、信頼できる人や学校の先生にこの記録を見せてみて。' }
+    '冷やす': {
+        title: '冷やす',
+        text: 'ズキズキ痛む時や熱がある時は、保冷剤をタオルで巻いて当ててみて。',
+        mapSearch: '近くのコンビニ 保冷剤',
+        webSearch: '正しいアイシングの方法'
+    },
+    '温める': {
+        title: '温める',
+        text: 'お腹が痛い時や筋肉が凝っている時は、ゆっくりお風呂に浸かって温めよう。',
+        mapSearch: '近くの銭湯',
+        webSearch: 'お腹を温める効果的な方法'
+    },
+    '休む': {
+        title: '休む',
+        text: '一番の薬は睡眠です。スマホを置いて、暗い部屋でゆっくり休みましょう。',
+        mapSearch: '近くのホテル',
+        webSearch: '早く寝るためのリラックス方法'
+    },
+    '水分': {
+        title: '水分補給',
+        text: '一度にたくさん飲まず、こまめに少しずつ常温の水を飲みましょう。',
+        mapSearch: '近くの自動販売機',
+        webSearch: '経口補水液の作り方'
+    },
+    '呼吸': {
+        title: 'リラックス呼吸',
+        text: '鼻から吸って、口からゆっくり吐く。5回繰り返すと落ち着くよ。',
+        mapSearch: '近くの公園',
+        webSearch: '自律神経を整える呼吸法'
+    },
+    '食事': {
+        title: '食事のアドバイス',
+        text: '消化に良いうどんやお粥を選ぼう。刺激物は控えめに。',
+        mapSearch: '近くのうどん屋',
+        webSearch: '消化に良い食べ物 レシピ'
+    },
+    '相談': {
+        title: '相談しよう',
+        text: '一人で抱え込まず、信頼できる人や学校の先生にこの記録を見せてみて。',
+        mapSearch: '近くの保健所',
+        webSearch: 'こども健康相談窓口 無料'
+    }
 };
 
 // 2. モーダルを表示する関数
@@ -141,61 +79,50 @@ function showDetail(type) {
         title.innerText = guide.title;
         let content = `<p>${guide.text}</p>`;
 
-        // 検索ワードがある場合だけ、病院検索ボタンを追加
-        if (guide.search) {
+        // ボタンエリアの開始
+        content += `<div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">`;
+
+        // マップ検索ボタン（緑色）
+        if (guide.mapSearch) {
             content += `
-                <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                    <button class="btn-solve" style="width: 100%; background-color: #ff9800; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;" 
-                        onclick="searchHospital('${guide.search}')">
-                        🏥 ${guide.search}を検索
-                    </button>
-                </div>`;
+                <button style="width: 100%; background-color: #4CAF50; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;" 
+                    onclick="openGoogleMap('${guide.mapSearch}')">
+                    📍 ${guide.mapSearch}をマップで探す
+                </button>`;
         }
+
+        // ウェブ検索ボタン（オレンジ色）
+        if (guide.webSearch) {
+            content += `
+                <button style="width: 100%; background-color: #ff9800; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;" 
+                    onclick="openGoogleSearch('${guide.webSearch}')">
+                    🔍 「${guide.webSearch}」を調べる
+                </button>`;
+        }
+
+        content += `</div>`;
         text.innerHTML = content;
     }
     modal.style.display = 'block';
 }
 
-// 3. 病院検索（Googleマップ）へ飛ばす関数
-function searchHospital(query) {
-    const q = query || "近くの病院";
-    // ブラウザが認識しやすい標準的なURL形式に修正
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+// ==========================================
+// 2. 検索・詳細表示
+// ==========================================
+function openGoogleMap(query) {
+    // 正しいGoogleマップ検索URL
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
     window.open(mapUrl, '_blank');
 }
 
-// 4. モーダルを閉じる関数
-function closeDetail() {
-    document.getElementById('modal-detail').style.display = 'none';
+function openGoogleSearch(query) {
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    window.open(searchUrl, '_blank');
 }
 
-
-// 4. 知恵袋投稿表示（community.html用）
-function renderPosts() {
-    const postList = document.getElementById('post-list');
-    const partFilter = document.getElementById('part-filter').value;
-    const posts = JSON.parse(localStorage.getItem('community_posts') || '[]');
-    postList.innerHTML = '';
-
-    const filteredPosts = partFilter === 'all' ? posts : posts.filter(p => p.part === partFilter);
-
-    filteredPosts.reverse().forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.innerHTML = `  
-            <div class="post-header">
-                <span class="post-tag">#${post.part}</span>
-                <span class="post-date">${new Date().toLocaleDateString()}</span>
-            </div>
-            <p>${post.text}</p>
-        `;
-        postList.appendChild(card);
-    }
-    );
-
-    if (filteredPosts.length === 0) {
-        postList.innerHTML = '<p style="text-align:center; padding:20px;">まだ投稿がありません。</p>';
-    }
+// 4. モーダルを閉じる
+function closeDetail() {
+    document.getElementById('modal-detail').style.display = 'none';
 }
 
 
@@ -205,27 +132,20 @@ function renderPosts() {
 
 function init() {
     displayPoints();
-    updateVisualization();
+    checkHomeNotifications();
 
-    // ホーム画面のLv表示
-    const lvEl = document.getElementById('lv');
-    if (lvEl) {
-        const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const total = logs.reduce((sum, log) => sum + (log.totalLevel || 0), 0);
-        lvEl.innerText = total;
-        updateFace(total);
+    // ページごとの判定
+    if (document.getElementById('current-date-display')) {
+        updateVisualization();
     }
-
-    // 履歴画面
     if (document.getElementById('history-body')) {
-        renderDamageChart();
         renderHistory();
+        renderDamageChart();
     }
-
-    // 分析画面
-    if (document.getElementById('type-result')) renderAnalysis();
+    if (document.getElementById('calendar-grid')) {
+        renderCalendar();
+    }
 }
-
 // イベント登録
 document.addEventListener('DOMContentLoaded', init);
 
@@ -260,19 +180,34 @@ if (document.readyState === 'loading') {
 // ==========================================
 function countUpAtLocation(part, event) {
     const damage = 5;
-    sessionLogs[part] = (sessionLogs[part] || 0) + damage;
 
-    // 総ダメージ計算
+    // 1. ログの保存
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const currentTotal = logs.reduce((sum, l) => sum + (l.totalLevel || 0), 0) + damage;
+    logs.push({
+        date: new Date().toISOString(),
+        details: { [part]: damage },
+        totalLevel: damage
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 
-    // UI更新
+    // 2. ポイント加算
+    let pts = parseInt(localStorage.getItem(POINT_KEY) || '0');
+    localStorage.setItem(POINT_KEY, pts + 1);
+    displayPoints();
+
+    // 3. UIの即時更新
+    // 本日の合計ダメージを計算して表示
+    const todayStr = new Date().toLocaleDateString();
+    const todayTotal = logs
+        .filter(l => new Date(l.date).toLocaleDateString() === todayStr)
+        .reduce((sum, l) => sum + l.totalLevel, 0);
+
     const lvEl = document.getElementById('lv');
-    if (lvEl) lvEl.innerText = currentTotal;
-    updateFace(currentTotal);
+    if (lvEl) lvEl.innerText = todayTotal;
 
+    updateFace(todayTotal);
+    updateVisualization();
     if (event) showTapEffect(event);
-    autoSave(part, damage);
 }
 
 function autoSave(part, amount) {
@@ -290,14 +225,6 @@ function autoSave(part, amount) {
 
 
 
-function closeDetail() {
-    document.getElementById('modal-detail').style.display = 'none';
-}
-
-
-
-
-
 
 
 // 日付を変更する関数
@@ -306,13 +233,6 @@ function changeDate(offset) {
     updateVisualization();
 }
 
-// 視覚化の更新
-// 視覚化の更新
-// 視覚化の更新
-// 1. 今日へ戻る関数
-// ==========================================
-// 2. 視覚化・日付切り替え（index.html / analysis.html用）
-// ==========================================
 
 function changeDate(offset) {
     viewingDate.setDate(viewingDate.getDate() + offset);
@@ -324,89 +244,87 @@ function resetToToday() {
     updateVisualization();
 }
 
+
+// ==========================================
+// 3. 視覚化（ヒートマップ）の更新
+// ==========================================
 function updateVisualization() {
-    // 日付表示の更新 (0埋めあり)
-    const y = viewingDate.getFullYear();
-    const m = String(viewingDate.getMonth() + 1).padStart(2, '0');
-    const d = String(viewingDate.getDate()).padStart(2, '0');
-    const dateStrFormatted = `${y}/${m}/${d}`;
     const dateStrCompare = viewingDate.toLocaleDateString();
 
+    // 日付表示の更新
     const dateDisplay = document.getElementById("current-date-display");
-    if (dateDisplay) dateDisplay.innerText = dateStrFormatted;
+    if (dateDisplay) {
+        const y = viewingDate.getFullYear();
+        const m = String(viewingDate.getMonth() + 1).padStart(2, '0');
+        const d = String(viewingDate.getDate()).padStart(2, '0');
+        dateDisplay.innerText = `${y}/${m}/${d}`;
+    }
 
-    // 今日ボタンの表示制御
-    const todayBtn = document.getElementById("today-reset-btn");
-    const isToday = new Date().toLocaleDateString() === dateStrCompare;
-    if (todayBtn) todayBtn.style.visibility = isToday ? "hidden" : "visible";
-
-    // エリアリセット
+    // 1. リセット（影や赤い装飾を完全に消す）
     document.querySelectorAll('.touch-area').forEach(a => {
         a.style.backgroundColor = 'transparent';
         a.style.boxShadow = 'none';
+        a.style.filter = 'none';
+        a.style.border = 'none';
     });
 
+    // 2. 集計
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let hasAnyLog = false;
     const summary = {};
+    let hasLog = false;
 
     logs.forEach(log => {
         if (new Date(log.date).toLocaleDateString() === dateStrCompare) {
-            hasAnyLog = true;
+            hasLog = true;
             for (let part in log.details) {
                 summary[part] = (summary[part] || 0) + (Number(log.details[part]) || 0);
             }
         }
     });
 
-    // 状態メッセージ
-    const targetPartEl = document.getElementById('target-part');
-    if (targetPartEl) {
-        targetPartEl.innerText = hasAnyLog ? "痛いところを押してね" : "この日の記録はありません";
-    }
-
-    // ヒートマップ反映
+    // 3. 反映
     for (let part in summary) {
         const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
         if (targetEl) {
             const damage = summary[part];
-            const opacity = Math.min(damage / 50, 0.7);
+            // 透明度だけを適用（赤色は背景のみ、影はなし）
+            const opacity = Math.max(0.2, Math.min(damage / 100, 0.7));
             targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
-            targetEl.style.boxShadow = `0 0 15px rgba(255, 0, 0, ${opacity})`;
+            // 枠線が必要な場合は以下を活かし、不要なら消してください
+            targetEl.style.border = `1px solid rgba(255, 0, 0, ${opacity})`;
         }
     }
 }
-// ログがない時のメッセージ
+
+// メッセージ更新
 const targetPartEl = document.getElementById('target-part');
 if (targetPartEl) {
-    targetPartEl.innerText = hasAnyLog ? "痛いところを押してね" : "この日の記録はありません";
+    targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
 }
 
-// データの反映（ここは元のままでOK！）
-for (const part in summary) {
+// 4. ヒートマップの反映（1つのループで完結）
+for (let part in summary) {
     const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
     if (targetEl) {
         const damage = summary[part];
-        const opacity = Math.min(damage / 50, 0.7);
+
+        // 透明度の計算（最小0.2、最大0.8）
+        const opacity = Math.max(0.2, Math.min(damage / 100, 0.8));
+
+        // 「ぼかしなし」のデザイン適用
         targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
-        targetEl.style.boxShadow = `0 0 15px rgba(255, 0, 0, ${opacity})`;
+        targetEl.style.border = `2px solid rgba(255, 0, 0, ${opacity + 0.1})`;
+
+        // もし中に数字を入れたい場合などのための微調整
+        targetEl.style.display = 'flex';
     }
 }
 
 
-// ダメージ量に応じて赤色を塗る
-for (const part in summary) {
-    const targetEl = document.getElementById(`part-${part}`);
-    if (targetEl) {
-        const damage = summary[part];
-        // 透明度をダメージ量で変える (最大Lv.100と想定)
-        const opacity = Math.min(damage / 100, 0.8);
-        targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
 
-        // 視覚的に「熱い」感じを出すための影
-        targetEl.style.boxShadow = `0 0 ${damage / 5}px rgba(255, 0, 0, 0.5)`;
-    }
-}
+
+
+
 
 // htmlのonclickの代わりにJS側で一括設定する場合
 // 判定エリアへの一括イベント登録
@@ -430,17 +348,91 @@ document.querySelectorAll('.touch-area').forEach(area => {
         }, 100);
     });
 });
+// ==========================================
+// 4. タップエフェクト（赤色・波紋なし版）
+// ==========================================
+// ==========================================
+// 4. 「押した感」を出すエフェクト群
+// ==========================================
 
-// タップエフェクト（+5）の座標修正
-function showTapEffect(e) {
+function showTapEffect(e, partName) {
+    // 1. 数字のポップアップ (+5)
     const effect = document.createElement('div');
     effect.className = 'tap-effect';
     effect.innerText = '+5';
-    effect.style.left = e.pageX + 'px';
-    effect.style.top = e.pageY + 'px';
+    effect.style.position = 'absolute';
+    effect.style.left = (e.pageX - 15) + 'px';
+    effect.style.top = (e.pageY - 30) + 'px';
+    effect.style.color = '#ff9800';
+    effect.style.fontWeight = 'bold';
+    effect.style.fontSize = '20px';
+    effect.style.pointerEvents = 'none';
+    effect.style.zIndex = '1000';
     document.body.appendChild(effect);
-    setTimeout(() => effect.remove(), 500);
+
+    effect.animate([
+        { transform: 'translateY(0) scale(1)', opacity: 1 },
+        { transform: 'translateY(-50px) scale(1.5)', opacity: 0 }
+    ], { duration: 600, easing: 'ease-out' });
+
+    // 2. パーティクル（飛び散る粒）の演出
+    for (let i = 0; i < 6; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'absolute';
+        p.style.width = '6px';
+        p.style.height = '6px';
+        p.style.borderRadius = '50%';
+        p.style.backgroundColor = '#ffeb3b'; // 黄色いキラキラ
+        p.style.left = e.pageX + 'px';
+        p.style.top = e.pageY + 'px';
+        p.style.pointerEvents = 'none';
+        document.body.appendChild(p);
+
+        const angle = (i / 6) * Math.PI * 2;
+        const velocity = 40 + Math.random() * 20;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+
+        p.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+        ], { duration: 400, easing: 'ease-out' });
+
+        setTimeout(() => p.remove(), 400);
+    }
+
+    setTimeout(() => effect.remove(), 600);
 }
+
+// ==========================================
+// 5. イベント登録（「凹む」動きを追加）
+// ==========================================
+document.addEventListener('pointerdown', (e) => {
+    const area = e.target.closest('.touch-area');
+    if (area) {
+        e.preventDefault();
+
+        // 1. 記録処理
+        const partName = area.id.replace('area-', '').replace('part-', '');
+        countUpAtLocation(partName, e);
+
+        // 2. 「押した感」を出すアニメーション
+        // 一瞬小さくなって（凹む）、パッと明るくなる
+        area.style.transition = 'none';
+        area.style.transform = 'scale(0.92)'; // 少し凹む
+        area.style.filter = 'brightness(1.5)'; // 一瞬光る
+
+        // 指を離すか、少し経つと元に戻る
+        setTimeout(() => {
+            area.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            area.style.transform = 'scale(1)';
+            area.style.filter = 'none';
+        }, 80);
+
+        showTapEffect(e, partName);
+    }
+});
+
 
 // 左右スワイプ検知
 let touchstartX = 0;
@@ -488,6 +480,7 @@ window.onload = function () {
         renderPosts();
     }
 };
+
 // 5. カレンダー描画（月切り替え対応版に統合）
 function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
@@ -584,21 +577,7 @@ function checkHomeNotifications() {
     if (homeBadge) homeBadge.style.display = hasUnread ? 'block' : 'none';
 }
 
-// 初期化
-window.onload = function () {
-    displayPoints();
-    checkHomeNotifications();
-    const path = window.location.pathname;
-    if (path.includes('analysis.html')) renderAnalysis();
-    if (path.includes('calendar.html')) renderCalendar();
-};
 
-
-
-
-// ==========================================
-// にわとりのつぶやき & 変化機能
-// ==========================================
 
 
 
@@ -679,3 +658,69 @@ init = function () {
         initHistoryPage();
     }
 };
+
+
+
+
+function toggleBodyView() {
+    isBackView = !isBackView;
+    const btn = document.getElementById('view-flip-btn');
+    const frontParts = document.querySelectorAll('.front-part');
+    const backPart = document.getElementById('part-back');
+    const mainImg = document.querySelector('.body-silhouette');
+
+    if (isBackView) {
+        btn.innerText = "まえを表示";
+        frontParts.forEach(el => el.style.display = 'none');
+        if (backPart) backPart.style.display = 'flex';
+        if (mainImg) mainImg.style.filter = "brightness(0.7) sepia(0.3)";
+    } else {
+        btn.innerText = "うしろを表示";
+        frontParts.forEach(el => el.style.display = 'flex');
+        if (backPart) backPart.style.display = 'none';
+        if (mainImg) mainImg.style.filter = "none";
+    }
+
+    if (!document.getElementById('view-flip-btn')) {
+        const wrapper = document.querySelector('.body-canvas-wrapper');
+        if (wrapper) {
+            const btn = document.createElement('button');
+            btn.id = 'view-flip-btn';
+            btn.innerText = 'うしろを表示';
+            btn.onclick = toggleBodyView;
+            // スタイルはCSSに書くか、ここで直接指定
+            btn.style = "position: absolute; top: -50px; left: 10px; z-index: 110;";
+            wrapper.appendChild(btn);
+        }
+    }
+}
+
+// 全てのイベント登録をここに集約
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+
+    // スワイプ検知の整理
+    let startX = 0;
+    document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
+    document.addEventListener('touchend', e => {
+        let diff = e.changedTouches[0].pageX - startX;
+        if (Math.abs(diff) > 70) { // 感度を少し下げて誤爆防止
+            changeDate(diff > 0 ? -1 : 1);
+        }
+    });
+
+    // 部位タップ
+    document.addEventListener('pointerdown', (e) => {
+        const area = e.target.closest('.touch-area');
+        if (area) {
+            e.preventDefault();
+            const partName = area.id.replace('area-', '').replace('part-', '');
+            countUpAtLocation(partName, e);
+
+            // ぷるん！
+            area.style.transition = 'transform 0.1s';
+            area.style.transform = 'scale(1.1)';
+            setTimeout(() => area.style.transform = 'scale(1.0)', 100);
+        }
+    });
+});
