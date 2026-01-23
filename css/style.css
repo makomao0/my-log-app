@@ -242,6 +242,8 @@ main {
     border: 3px solid var(--border);
 }
 
+
+
 /* action.html１......css*/
 .action-body {
     margin: 0 auto;
@@ -405,25 +407,19 @@ main {
     justify-content: center;
     cursor: pointer;
     z-index: 50;
-    transition: background-color 0.5s ease;
     border-radius: 50%;
-    transition: all 0.5s ease;
-    filter: none !important;
-    /* ぼかしを強制無効 */
-    box-shadow: none !important;
-    /* 影を強制無効 */
-    transition: background-color 0.2s;
-    /* 色の変化だけを少し滑らかに */
+    /* 最初は完全透明 */
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    filter: none;
+    transition: all 0.4s ease;
+    /* 変化をヌルっとさせる */
 }
 
-
-/* 中の文字を見やすくする */
+/* 部位名のテキスト(span)をデフォルトで非表示にする */
 .touch-area span {
-    background: rgba(255, 255, 255, 0.7);
-    /* 文字の背景を少し白くする */
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 11px;
+    display: none !important;
 }
 
 /* 記録モード中はクリックを無効化したい場合はここを調整 */
