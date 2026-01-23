@@ -34,25 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 部位タップ
-    document.addEventListener('pointerdown', (e) => {
-        const area = e.target.closest('.touch-area');
-        if (area) {
-            e.preventDefault();
-            const partName = area.id.replace('area-', '').replace('part-', '');
-            countUpAtLocation(partName, e);
 
-            // ぷるん！
-            area.style.transition = 'none';
-            area.style.backgroundColor = 'rgba(255, 200, 0, 0.12)'; // 押した瞬間だけ明るい黄色に
-            area.style.transform = 'scale(1.2)';
-
-            setTimeout(() => {
-                area.style.transition = 'all 0.4s ease';
-                updateVisualization(); // 自動的にヒートマップのオレンジに戻る
-            }, 100);
-        }
-    });
 });
 
 function getYMD(date) {
@@ -170,17 +152,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// タッチエリアのイベント一括登録
-document.addEventListener('pointerdown', (e) => {
-    const area = e.target.closest('.touch-area');
-    if (area) {
-        e.preventDefault();
-        const partName = area.id.replace('area-', '').replace('part-', '');
-        countUpAtLocation(partName, e);
-        area.style.transform = 'scale(1.2)';
-        setTimeout(() => area.style.transform = 'scale(1.0)', 100);
-    }
-});
+
 
 // スワイプ検知
 let startX = 0;
@@ -282,7 +254,7 @@ function updateVisualization() {
     document.querySelectorAll('.touch-area').forEach(a => {
         a.style.backgroundColor = 'transparent';
         a.style.boxShadow = 'none';
-        a.style.filter = 'none';
+        a.style.filter = 'none'; // 一旦リセット
     });
 
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -302,31 +274,22 @@ function updateVisualization() {
             }
         }
     });
-
     for (let part in summary) {
         const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
         if (targetEl) {
             const damage = summary[part];
+            const opacity = Math.max(0.4, Math.min(damage / 40, 0.8));
 
-            // 【改善点1】分母を小さくして色がつきやすくする（30くらいがおすすめ）
-            // 【改善点2】最低値を0.5にして、1回目からハッキリ見せる
-            const opacity = Math.max(0.5, Math.min(damage / 30, 0.9));
+            // ぼかしの強さをダメージに連動させる
+            const blurValue = Math.min(damage / 2, 15);
 
-            // 【改善点3】ぼかしサイズを調整
-            const blurRadius = Math.max(10, Math.min(damage, 30));
+            targetEl.style.backgroundColor = `rgba(255, 60, 0, ${opacity})`;
 
-            targetEl.style.border = 'none';
-            // より鮮やかなオレンジ〜赤に変更
-            targetEl.style.backgroundColor = `rgba(255, 80, 0, ${opacity})`;
+            // box-shadow を重ねて「ボワッ」とした光を作る
+            targetEl.style.boxShadow = `0 0 ${blurValue * 2}px ${blurValue}px rgba(255, 100, 0, ${opacity})`;
 
-            // じわっとした光の演出（外側の光を強くする）
-            targetEl.style.boxShadow = `0 0 ${blurRadius}px ${blurRadius / 2}px rgba(255, 100, 0, ${opacity * 0.8})`;
-
-            // 【改善点4】全体ぼかしを弱める（ここが強いと色が消えます）
-            targetEl.style.filter = 'blur(2px)';
-
-            const label = targetEl.querySelector('span');
-            if (label) label.style.display = 'none';
+            // filter の blur は控えめに（2px〜4px程度）
+            targetEl.style.filter = `blur(${Math.max(2, blurValue / 3)}px)`;
         }
     }
 
@@ -340,32 +303,6 @@ function updateVisualization() {
 
 
 
-
-
-
-
-// htmlのonclickの代わりにJS側で一括設定する場合
-// 判定エリアへの一括イベント登録
-document.querySelectorAll('.touch-area').forEach(area => {
-    // pointerdownを使うことでスマホの反応を速くします
-    area.addEventListener('pointerdown', (e) => {
-        e.preventDefault(); // ブラウザのデフォルト動作を防止
-
-        // IDから「area-」や「part-」を取り除いて部位名を取得
-        // HTML側で id="area-あたま" のように設定されている前提です
-        const partName = e.currentTarget.id.replace('area-', '').replace('part-', '');
-
-        // 記録処理
-        countUpAtLocation(partName, e);
-
-        // 視覚フィードバック（ぷるん）
-        e.currentTarget.style.transition = 'transform 0.1s';
-        e.currentTarget.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            e.currentTarget.style.transform = 'scale(1.0)';
-        }, 100);
-    });
-});
 
 
 
@@ -419,33 +356,23 @@ function showTapEffect(e, partName) {
     setTimeout(() => effect.remove(), 600);
 }
 
-// ==========================================
-// 5. イベント登録（「凹む」動きを追加）
-// ==========================================
 document.addEventListener('pointerdown', (e) => {
     const area = e.target.closest('.touch-area');
-    if (area) {
-        e.preventDefault();
+    if (!area) return;
 
-        // 1. 記録処理
-        const partName = area.id.replace('area-', '').replace('part-', '');
-        countUpAtLocation(partName, e);
+    e.preventDefault();
+    const partName = area.id.replace('area-', '').replace('part-', '');
 
-        // 2. 「押した感」を出すアニメーション
-        // 一瞬小さくなって（凹む）、パッと明るくなる
-        area.style.transition = 'none';
-        area.style.transform = 'scale(0.92)'; // 少し凹む
-        area.style.filter = 'brightness(1.5)'; // 一瞬光る
+    // 1回だけ記録を実行（これで10ダメージ問題を解決）
+    countUpAtLocation(partName, e);
 
-        // 指を離すか、少し経つと元に戻る
-        setTimeout(() => {
-            area.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            area.style.transform = 'scale(1)';
-            area.style.filter = 'none';
-        }, 80);
-
-        showTapEffect(e, partName);
-    }
+    // 演出：凹むアニメーション
+    area.style.transition = 'none';
+    area.style.transform = 'scale(0.92)';
+    setTimeout(() => {
+        area.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        area.style.transform = 'scale(1)';
+    }, 80);
 });
 
 
