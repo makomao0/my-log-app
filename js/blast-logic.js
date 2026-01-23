@@ -295,8 +295,11 @@ function checkAndClearLines() {
         setTimeout(() => {
             rowsToClear.forEach(r => gridData[r].fill(null));
             colsToClear.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) gridData[r][c] = null; });
+            // 既存の checkAndClearLines のスコア更新部分に加えると良いです
             totalScore += (rowsToClear.length + colsToClear.length) * 100;
             document.getElementById('score').innerText = totalScore;
+            // ここで中間保存しておくと、万が一途中で閉じても安心です
+            localStorage.setItem('temp_puzzle_score', totalScore);
             updateBoard();
             document.querySelectorAll('.cell').forEach(el => el.style.transform = 'scale(1)');
         }, 200);
@@ -326,3 +329,11 @@ function checkGameOver() {
 }
 
 initGrid();
+
+function finishGame() {
+    const earnedPoints = Math.floor(totalScore / 10);
+    const currentTotal = parseInt(localStorage.getItem('user_total_points') || '0');
+    localStorage.setItem('user_total_points', currentTotal + earnedPoints);
+    alert(`${earnedPoints} ポイント獲得しました！`);
+    location.href = 'index.html';
+}
