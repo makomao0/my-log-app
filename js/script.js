@@ -3,11 +3,10 @@
 // ==========================================
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
-let sessionLogs = {};
-let viewingDate = new Date(); // ホーム画面用
+
+let viewingDate = new Date(); // ホーム画面用（ヒートマップ表示用）
 let displayDate = new Date(); // カレンダー画面用
-
-
+let isBackView = false;       // 背面表示フラグ
 
 // ==========================================
 // 4. アクション・詳細表示（action.html用）
@@ -73,57 +72,38 @@ const MEDICAL_GUIDE = {
 };
 
 // 2. モーダルを表示する関数
-function showDetail(type) {
-    const modal = document.getElementById('modal-detail');
-    const title = document.getElementById('detail-title');
-    const text = document.getElementById('detail-text');
-
-    const guide = MEDICAL_GUIDE[type];
-
-    if (guide) {
-        title.innerText = guide.title;
-        let content = `<p>${guide.text}</p>`;
-
-        // ボタンエリアの開始
-        content += `<div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">`;
-
-        // マップ検索ボタン（緑色）
-        if (guide.mapSearch) {
-            content += `
-                <button style="width: 100%; background-color: #4CAF50; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;" 
-                    onclick="openGoogleMap('${guide.mapSearch}')">
-                    📍 ${guide.mapSearch}をマップで探す
-                </button>`;
-        }
-
-        // ウェブ検索ボタン（オレンジ色）
-        if (guide.webSearch) {
-            content += `
-                <button style="width: 100%; background-color: #ff9800; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;" 
-                    onclick="openGoogleSearch('${guide.webSearch}')">
-                    🔍 「${guide.webSearch}」を調べる
-                </button>`;
-        }
-
-        content += `</div>`;
-        text.innerHTML = content;
-    }
-    modal.style.display = 'block';
-}
-
-// 3. 検索実行用関数
 function openGoogleMap(query) {
-    // 正しいGoogleマップ検索URL
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
     window.open(mapUrl, '_blank');
 }
 
 function openGoogleSearch(query) {
-    // Google検索URL
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     window.open(searchUrl, '_blank');
 }
 
+function showDetail(type) {
+    const modal = document.getElementById('modal-detail');
+    const title = document.getElementById('detail-title');
+    const text = document.getElementById('detail-text');
+    const guide = MEDICAL_GUIDE[type];
+
+    if (guide && modal) {
+        title.innerText = guide.title;
+        let content = `<p>${guide.text}</p>`;
+        content += `<div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">`;
+
+        if (guide.mapSearch) {
+            content += `<button style="..." onclick="openGoogleMap('${guide.mapSearch}')">📍 ${guide.mapSearch}をマップで探す</button>`;
+        }
+        if (guide.webSearch) {
+            content += `<button style="..." onclick="openGoogleSearch('${guide.webSearch}')">🔍 「${guide.webSearch}」を調べる</button>`;
+        }
+        content += `</div>`;
+        text.innerHTML = content;
+        modal.style.display = 'block';
+    }
+}
 // 4. モーダルを閉じる
 function closeDetail() {
     document.getElementById('modal-detail').style.display = 'none';
@@ -136,28 +116,11 @@ function closeDetail() {
 
 function init() {
     displayPoints();
-
-    // 全ページ共通
-    checkHomeNotifications();
-
-    // ホーム画面用 (人体シルエットがある場合)
-    if (document.getElementById('current-date-display')) {
-        updateVisualization();
-        const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const total = logs.reduce((sum, log) => sum + (log.totalLevel || 0), 0);
-        const lvEl = document.getElementById('lv');
-        if (lvEl) lvEl.innerText = total;
-        updateFace(total);
-    }
-    if (document.getElementById('history-body')) {
-        renderHistory();
-        renderDamageChart();
-    }
-    if (document.getElementById('calendar-grid')) {
-        renderCalendar();
-    }
+    if (document.getElementById('current-date-display')) updateVisualization();
+    if (document.getElementById('history-body')) renderHistory();
+    if (document.getElementById('calendar-grid')) renderCalendar();
 }
-// イベント登録
+
 document.addEventListener('DOMContentLoaded', init);
 
 // タッチエリアのイベント一括登録
@@ -191,9 +154,9 @@ if (document.readyState === 'loading') {
 // ==========================================
 function countUpAtLocation(part, event) {
     const damage = 5;
-
-    // 1. ログの保存
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    // ログ保存
     logs.push({
         date: new Date().toISOString(),
         details: { [part]: damage },
@@ -201,13 +164,12 @@ function countUpAtLocation(part, event) {
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 
-    // 2. ポイント加算
+    // ポイント加算
     let pts = parseInt(localStorage.getItem(POINT_KEY) || '0');
     localStorage.setItem(POINT_KEY, pts + 1);
     displayPoints();
 
-    // 3. UIの即時更新
-    // 本日の合計ダメージを計算して表示
+    // UI更新（本日分の合計値を計算）
     const todayStr = new Date().toLocaleDateString();
     const todayTotal = logs
         .filter(l => new Date(l.date).toLocaleDateString() === todayStr)
@@ -220,6 +182,9 @@ function countUpAtLocation(part, event) {
     updateVisualization();
     if (event) showTapEffect(event);
 }
+
+
+
 
 function autoSave(part, amount) {
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -259,10 +224,13 @@ function resetToToday() {
 // ==========================================
 // 3. 視覚化（ヒートマップ）の更新
 // ==========================================
+// ==========================================
+// 3. 視覚化（ヒートマップ）の更新
+// ==========================================
 function updateVisualization() {
     const dateStrCompare = viewingDate.toLocaleDateString();
 
-    // 日付表示の更新
+    // 1. 日付表示の更新
     const dateDisplay = document.getElementById("current-date-display");
     if (dateDisplay) {
         const y = viewingDate.getFullYear();
@@ -271,65 +239,37 @@ function updateVisualization() {
         dateDisplay.innerText = `${y}/${m}/${d}`;
     }
 
-    // 1. リセット（影や赤い装飾を完全に消す）
+    // 2. リセット（前の状態が残らないように全て消す）
     document.querySelectorAll('.touch-area').forEach(a => {
         a.style.backgroundColor = 'transparent';
+        a.style.border = 'none';
         a.style.boxShadow = 'none';
         a.style.filter = 'none';
-        a.style.border = 'none';
     });
 
-    // 2. 集計
+    // 3. 集計処理
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const summary = {};
-    let hasLog = false;
+    let hasLogForThisDay = false;
 
     logs.forEach(log => {
         if (new Date(log.date).toLocaleDateString() === dateStrCompare) {
-            hasLog = true;
+            hasLogForThisDay = true;
             for (let part in log.details) {
                 summary[part] = (summary[part] || 0) + (Number(log.details[part]) || 0);
             }
         }
     });
 
-    // 3. 反映
-    for (let part in summary) {
-        const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
-        if (targetEl) {
-            const damage = summary[part];
-            // 透明度だけを適用（赤色は背景のみ、影はなし）
-            const opacity = Math.max(0.2, Math.min(damage / 100, 0.7));
-            targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
-            // 枠線が必要な場合は以下を活かし、不要なら消してください
-            targetEl.style.border = `1px solid rgba(255, 0, 0, ${opacity})`;
-        }
+    // 4. メッセージ更新
+    const targetPartEl = document.getElementById('target-part');
+    if (targetPartEl) {
+        targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
     }
+
+
 }
 
-// メッセージ更新
-const targetPartEl = document.getElementById('target-part');
-if (targetPartEl) {
-    targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
-}
-
-// 4. ヒートマップの反映（1つのループで完結）
-for (let part in summary) {
-    const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
-    if (targetEl) {
-        const damage = summary[part];
-
-        // 透明度の計算（最小0.2、最大0.8）
-        const opacity = Math.max(0.2, Math.min(damage / 100, 0.8));
-
-        // 「ぼかしなし」のデザイン適用
-        targetEl.style.backgroundColor = `rgba(255, 0, 0, ${opacity})`;
-        targetEl.style.border = `2px solid rgba(255, 0, 0, ${opacity + 0.1})`;
-
-        // もし中に数字を入れたい場合などのための微調整
-        targetEl.style.display = 'flex';
-    }
-}
 
 
 
@@ -469,14 +409,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-// ==========================================
-// 5. カレンダー・知恵袋・初期化
-// ==========================================
-
 function displayPoints() {
     const el = document.getElementById('point-display');
     if (el) el.innerText = localStorage.getItem(POINT_KEY) || '0';
 }
+
 
 window.onload = function () {
     displayPoints(); // ポイント表示
@@ -573,12 +510,6 @@ function updateFace(lv) {
 function changeMonth(diff) {
     displayDate.setMonth(displayDate.getMonth() + diff);
     renderCalendar();
-}
-
-// 6. 共通処理（ポイント・通知）
-function displayPoints() {
-    const el = document.getElementById('point-display');
-    if (el) el.innerText = localStorage.getItem('user_points') || '0';
 }
 
 function checkHomeNotifications() {
