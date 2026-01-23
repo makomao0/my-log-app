@@ -1,0 +1,986 @@
+:root {
+    --bg: #fdba1d;
+    --text: #000000;
+    --border: #eeeeee;
+    --accent: #f5f5f5;
+
+    /* 追加の色変数 */
+    --primary: #f37e18;
+    --secondary: #ee8310;
+    --card-bg: #ffffff;
+    --light-bg: #fafafa;
+    --light-gray: #eee;
+    --text-light: #888;
+    --text-muted: #555;
+    --input-border: #eefeff;
+}
+
+* {
+    font-family: "Kosugi Maru", sans-serif !important;
+}
+
+/* アプリ内のすべての要素に Kiwi Maru を適用 */
+/* ボタン、入力欄、セレクトボックスにも適用 */
+button,
+input,
+select,
+textarea {
+    font-family: "Kosugi Maru", sans-serif;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0 15px;
+    /* 左右に少し余裕を */
+    background-image: url(../imgs/home-bg.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    color: var(--text);
+    box-sizing: border-box;
+}
+
+main {
+    margin-bottom: 130px;
+    /* ナビゲーションバーの高さ分の余白を確保 */
+}
+
+
+.calendar-bg {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: #eaeaea46;
+    border: #e0f7f8 2px solid;
+    border-radius: 20px;
+}
+
+.nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    /* 左端も指定すると安定します */
+    width: 100%;
+    display: flex;
+    background: #55bbbf;
+    z-index: 1000;
+    height: 100px;
+    /* 130px から 80px 程度に縮小 */
+    justify-content: center;
+}
+
+.nav-item img {
+    width: 100px;
+    /* 100px から 50px 程度に縮小 */
+    height: auto;
+}
+
+.nav-item {
+    flex: 1;
+    text-align: center;
+    /* パディングも調整 */
+    font-size: 10px;
+}
+
+.nav-bar :hover {
+    background: var(--accent);
+    transform: scale(1.01);
+    transition: 0.5s;
+}
+
+/* カレンダー画面専用の調整 */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px;
+
+    /* 画面からはみ出さないよう、高さを自動調整 */
+    max-height: calc(100vh - 250px);
+    overflow: hidden;
+    /* 万が一入り切らない場合はこの中だけスクロール可能に */
+}
+
+.cal-day {
+    aspect-ratio: 1 /1;
+    /* 正方形にする */
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.cal-day.active {
+    background-color: #fff9e6b7;
+    /* 記録がある日 */
+    border-color: #ff9900;
+}
+
+.cal-day.today {
+    outline: 3px solid #e16c6a;
+    /* 今日を強調 */
+}
+
+.cal-day.empty {
+    background: none;
+    border: none;
+}
+
+/* カレンダー */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+/* カレンダーの選択中スタイル */
+.cal-day.selected {
+    background-color: #f1c25d !important;
+    color: white;
+    border-radius: 50%;
+}
+
+/* 縦型カルーセルの容器 */
+.vertical-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 280px;
+    /* カード約2枚分見える高さ */
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    /* カチッと止まる設定 */
+    padding: 10px 5px;
+}
+
+/* 各カードのスタイル */
+.carousel-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    border: 2px solid #55bbbf;
+    scroll-snap-align: start;
+    /* スクロールした時にこの位置で止まる */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.card-time {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.card-badge {
+    background: #55bbbf;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.card-body {
+    font-size: 1rem;
+    color: #333;
+}
+
+.card-body strong {
+    color: #ea7824;
+    /* primaryカラー */
+}
+
+/* イベント詳細エリア */
+.event-list-area {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    border: 2px solid #55bbbf;
+}
+
+.event-date-header {
+    font-weight: bold;
+    color: #333;
+    border-bottom: 2px solid #55bbbf;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #ccc;
+}
+
+.event-time {
+    font-size: 0.8rem;
+    color: #666;
+    min-width: 50px;
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.event-detail span {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.event-summary {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #55bbbf;
+}
+
+.no-event {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+/* スクロールバーを隠す（オプション） */
+.chart-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.chart-viewport {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.btn-post-fab {
+    position: fixed;
+    bottom: 150px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: white;
+    font-size: 30px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 99;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    border-radius: 25px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-content h3 {
+    color: var(--primary);
+    margin-top: 0;
+    text-align: center;
+}
+
+.modal-sub {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.btn-cancel {
+    background: var(--light-gray);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.box {
+    border-radius: 20px;
+    padding: 20px;
+    margin: 15px;
+    text-align: center;
+    border: 2px solid var(--primary);
+}
+
+.post-card {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--light-gray);
+    padding: 15px;
+    display: flex;
+    gap: 12px;
+}
+
+.tag {
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.btn-thank {
+    background: var(--light-bg);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+.btn-thank:active {
+    transform: scale(0.9);
+    background: var(--primary);
+    color: white;
+}
+
+
+
+
+.post-main {
+    flex-grow: 1;
+    /* 残りの幅をすべて使う */
+    min-width: 0;
+    /* テキスト溢れ防止 */
+}
+
+.action-item {
+    font-size: 0.75rem;
+    color: var(--primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.board-header {
+    padding: 10px 15px;
+    background: var(--card-bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid var(--input-border);
+    background: #f0f0f0;
+}
+
+.sort-options button {
+    flex: 1;
+    padding: 5px;
+    border: none;
+    background: var(--light-gray);
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.sort-options button.active {
+    background: var(--primary);
+    color: white;
+}
+
+.highlight-post {
+    animation: highlightFade 2s ease-out;
+    border: 2px solid #e1ff4d !important;
+    z-index: 5;
+}
+
+/* 分析画面のヒートスポット */
+/* ヒートマップのコンテナ */
+.heatmap-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* 両端に寄せる */
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+    margin: 15px;
+    padding: 15px 25px;
+    /* 内側に少し余裕を */
+}
+
+.body-mini {
+    position: relative;
+    width: 100px;
+    height: 150px;
+    background: url('../imgs/top-silhouette-icon.png') no-repeat center;
+    /* 体の輪郭画像 */
+    background-size: contain;
+}
+
+.heat-spot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: rgba(234, 120, 36, 0.6);
+    /* オレンジ色の光 */
+    border-radius: 50%;
+    filter: blur(5px);
+    display: none;
+    /* 初期は非表示 */
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 各部位の位置調整（画像に合わせて調整してください） */
+/* 各部位の位置調整：IDを英語に統一 */
+#heat-head {
+    top: 10%;
+    left: 40%;
+}
+
+#heat-ear-r {
+    top: 12%;
+    left: 30%;
+}
+
+#heat-ear-l {
+    top: 12%;
+    left: 50%;
+}
+
+#heat-neck {
+    top: 22%;
+    left: 40%;
+}
+
+#heat-chest {
+    top: 32%;
+    left: 40%;
+}
+
+#heat-stomach {
+    top: 45%;
+    left: 40%;
+}
+
+#heat-back {
+    top: 45%;
+    left: 40%;
+}
+
+#heat-arm-r {
+    top: 40%;
+    left: 20%;
+}
+
+#heat-arm-l {
+    top: 40%;
+    left: 60%;
+}
+
+#heat-leg-r {
+    top: 75%;
+    left: 30%;
+}
+
+#heat-leg-l {
+    top: 75%;
+    left: 50%;
+}
+
+.my-post-label {
+    background: #ffecd2;
+    color: #fb8c00;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: #ff5252;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-left: auto;
+    /* 右端に寄せる */
+    padding: 5px;
+}
+
+.btn-delete:hover {
+    text-decoration: underline;
+}
+
+.btn-edit {
+    background: none;
+    border: none;
+    color: #4a90e2;
+    /* 青色 */
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 5px;
+}
+
+
+/* アイコン選択の見た目 */
+.avatar-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    background: #fdfdfd;
+    padding: 10px;
+    border-radius: 10px;
+    justify-content: center;
+}
+
+.avatar-selector input[type="radio"] {
+    display: none;
+    /* ラジオボタン自体は見せなくする */
+}
+
+.avatar-selector label {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: 0.2s;
+    border: 2px solid transparent;
+}
+
+/* 選択された時の見た目 */
+.avatar-selector input[type="radio"]:checked+label {
+    background: #fff3e0;
+    border-color: #fb8c00;
+    transform: scale(1.2);
+}
+
+.avatar-selection-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+}
+
+.avatar-selection-section label {
+    font-size: small;
+}
+
+
+/* アイコンの表示エリア */
+.selected-avatar-display {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 1.rem;
+    color: #000000b0;
+    margin-bottom: 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+}
+
+.selected-avatar-display:hover {
+    background: #e0e0e04c;
+}
+
+/* アイコンが並ぶグリッド */
+/* モーダル内の画像リスト */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 20px;
+}
+
+.avatar-grid img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    /* 丸くする */
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.2s;
+    object-fit: cover;
+    /* 画像の比率を維持 */
+}
+
+.avatar-grid img:hover {
+    transform: scale(1.1);
+    border-color: #fb8c00;
+}
+
+/* 投稿カード内のアイコン */
+.user-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+}
+
+/* 選択中のアイコン表示 */
+.selected-avatar-display img {
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.modal-overlay .modal-buttons {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* 成功メッセージのスタイル */
+.success-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #fb8c00;
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 表示された時 */
+.success-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+.toast-content {
+    text-align: center;
+}
+
+.toast-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 10px;
+    animation: bounce 0.6s infinite alternate;
+}
+
+.toast-message {
+    font-weight: bold;
+    color: #fb8c00;
+    font-size: 1.1rem;
+}
+
+/* ぴょこぴょこ跳ねるアニメーション */
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-10px);
+    }
+}
+
+.post-attached-image {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    max-height: 250px;
+}
+
+.post-attached-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: zoom-in;
+    display: block;
+}
+
+.file-input-wrapper {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    border: 2px dashed #ddd;
+}
+
+.stamp-container {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.stamp-btn {
+    background: #f0f2f5;
+    border: none;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stamp-btn:hover {
+    background: #e4e6eb;
+    transform: translateY(-2px);
+}
+
+.stamp-btn .count {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.8rem;
+}
+
+/* 自分が押した感を出したい場合は、色を変えるなどの工夫もできます */
+
+
+#history-list {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    border: #94a3b8 1px solid;
+
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.history-table th {
+    text-align: left;
+    font-size: 12px;
+    color: #888;
+    padding: 8px;
+    border-bottom: 1px solid var(--primary);
+}
+
+.history-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* 記録回数ボタンの装飾 */
+.time-detail-btn {
+    border: 1px solid var(--primary);
+    background: #fff;
+    color: var(--primary);
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.time-detail-btn:active {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* 部位のタグ（お薬手帳風） */
+.part-tag {
+    display: inline-block;
+    background: #e0f7f8;
+    color: #00838f;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+
+/* データがない時の表示 */
+.no-event {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9em;
+}
+
+/* カレンダーのグリッド */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.cal-day {
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.cal-day.selected {
+    background-color: #ffeb3b;
+    border: 2px solid #55bbbf;
+}
+
+.mark {
+    position: absolute;
+    bottom: 2px;
+    font-size: 10px;
+}
+
+/* 履歴テーブル（お薬手帳スタイル） */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+}
+
+.history-table th,
+.history-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.no-data-msg {
+    text-align: center;
+    padding: 30px;
+    color: #94a3b8;
+}
+
+/* モーダル */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+    color: #333;
+}
+
+.modal-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.modal-content button {
+    background: #55bbbf;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    width: 100%;
+    font-weight: bold;
+}
