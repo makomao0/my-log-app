@@ -3,15 +3,62 @@
 // ==========================================
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
+const LEVEL_KEY = 'currentLevel';
 
-let viewingDate = new Date(); // ホーム画面用（ヒートマップ表示用）
 let displayDate = new Date(); // カレンダー画面用
 let isBackView = false;       // 背面表示フラグ
 
-// ==========================================
-// 4. アクション・詳細表示（action.html用）
-// ==========================================
+// 修正案：日付を保持する
+let viewingDate = sessionStorage.getItem('lastViewDate')
+    ? new Date(sessionStorage.getItem('lastViewDate'))
+    : new Date();
 
+function updateVisualization() {
+    // ... 既存の処理 ...
+
+    // 表示中の日付を一時保存（リロード対策）
+    sessionStorage.setItem('lastViewDate', viewingDate.toISOString());
+}
+
+// 全てのイベント登録をここに集約
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+
+    // スワイプ検知の整理
+    let startX = 0;
+    document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
+    document.addEventListener('touchend', e => {
+        let diff = e.changedTouches[0].pageX - startX;
+        if (Math.abs(diff) > 70) { // 感度を少し下げて誤爆防止
+            changeDate(diff > 0 ? -1 : 1);
+        }
+    });
+
+    // 部位タップ
+    document.addEventListener('pointerdown', (e) => {
+        const area = e.target.closest('.touch-area');
+        if (area) {
+            e.preventDefault();
+            const partName = area.id.replace('area-', '').replace('part-', '');
+            countUpAtLocation(partName, e);
+
+            // ぷるん！
+            area.style.transition = 'none';
+            area.style.backgroundColor = 'rgba(255, 200, 0, 0.12)'; // 押した瞬間だけ明るい黄色に
+            area.style.transform = 'scale(1.2)';
+
+            setTimeout(() => {
+                area.style.transition = 'all 0.4s ease';
+                updateVisualization(); // 自動的にヒートマップのオレンジに戻る
+            }, 100);
+        }
+    });
+});
+
+function getYMD(date) {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
 
 // 1. データの定義（マップ用とウェブ検索用を分ける）
 const MEDICAL_GUIDE = {
@@ -210,10 +257,6 @@ function changeDate(offset) {
 }
 
 
-function changeDate(offset) {
-    viewingDate.setDate(viewingDate.getDate() + offset);
-    updateVisualization();
-}
 
 function resetToToday() {
     viewingDate = new Date();
@@ -224,13 +267,9 @@ function resetToToday() {
 // ==========================================
 // 3. 視覚化（ヒートマップ）の更新
 // ==========================================
-// ==========================================
-// 3. 視覚化（ヒートマップ）の更新
-// ==========================================
+
 function updateVisualization() {
     const dateStrCompare = viewingDate.toLocaleDateString();
-
-    // 1. 日付表示の更新
     const dateDisplay = document.getElementById("current-date-display");
     if (dateDisplay) {
         const y = viewingDate.getFullYear();
@@ -239,21 +278,24 @@ function updateVisualization() {
         dateDisplay.innerText = `${y}/${m}/${d}`;
     }
 
-    // 2. リセット（前の状態が残らないように全て消す）
+    // リセット
     document.querySelectorAll('.touch-area').forEach(a => {
         a.style.backgroundColor = 'transparent';
-        a.style.border = 'none';
         a.style.boxShadow = 'none';
         a.style.filter = 'none';
     });
 
-    // 3. 集計処理
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const summary = {};
     let hasLogForThisDay = false;
 
     logs.forEach(log => {
-        if (new Date(log.date).toLocaleDateString() === dateStrCompare) {
+        const logDate = new Date(log.date);
+        const isSameDay = logDate.getFullYear() === viewingDate.getFullYear() &&
+            logDate.getMonth() === viewingDate.getMonth() &&
+            logDate.getDate() === viewingDate.getDate();
+
+        if (isSameDay) {
             hasLogForThisDay = true;
             for (let part in log.details) {
                 summary[part] = (summary[part] || 0) + (Number(log.details[part]) || 0);
@@ -261,35 +303,38 @@ function updateVisualization() {
         }
     });
 
-    // 反映（文字なし・オレンジ・ぼかしデザイン）
     for (let part in summary) {
         const targetEl = document.getElementById(`part-${part}`) || document.getElementById(`area-${part}`);
         if (targetEl) {
             const damage = summary[part];
-            const opacity = Math.max(0.3, Math.min(damage / 100, 0.8));
-            const blurSize = Math.max(15, Math.min(damage / 2, 40)); // 痛みで光の広がりを変える
 
-            // 文字（spanタグなど）を完全に非表示にする
+            // 【改善点1】分母を小さくして色がつきやすくする（30くらいがおすすめ）
+            // 【改善点2】最低値を0.5にして、1回目からハッキリ見せる
+            const opacity = Math.max(0.5, Math.min(damage / 30, 0.9));
+
+            // 【改善点3】ぼかしサイズを調整
+            const blurRadius = Math.max(10, Math.min(damage, 30));
+
+            targetEl.style.border = 'none';
+            // より鮮やかなオレンジ〜赤に変更
+            targetEl.style.backgroundColor = `rgba(255, 80, 0, ${opacity})`;
+
+            // じわっとした光の演出（外側の光を強くする）
+            targetEl.style.boxShadow = `0 0 ${blurRadius}px ${blurRadius / 2}px rgba(255, 100, 0, ${opacity * 0.8})`;
+
+            // 【改善点4】全体ぼかしを弱める（ここが強いと色が消えます）
+            targetEl.style.filter = 'blur(2px)';
+
             const label = targetEl.querySelector('span');
             if (label) label.style.display = 'none';
-
-            // 枠線を消し、オレンジの光を設定
-            targetEl.style.border = 'none';
-            targetEl.style.backgroundColor = `rgba(255, 120, 0, ${opacity})`;
-
-            // じわっとした熱源のような表現
-            targetEl.style.boxShadow = `0 0 ${blurSize}px ${blurSize / 2}px rgba(255, 140, 0, ${opacity * 0.7})`;
-            targetEl.style.filter = 'blur(6px)'; // ぼかしを少し強めて境界をなくす
         }
     }
 
-    // 4. メッセージ更新
     const targetPartEl = document.getElementById('target-part');
     if (targetPartEl) {
+        // hasLogForThisDay に名前を合わせる
         targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
     }
-
-
 }
 
 
@@ -321,12 +366,9 @@ document.querySelectorAll('.touch-area').forEach(area => {
         }, 100);
     });
 });
-// ==========================================
-// 4. タップエフェクト（赤色・波紋なし版）
-// ==========================================
-// ==========================================
-// 4. 「押した感」を出すエフェクト群
-// ==========================================
+
+
+
 
 function showTapEffect(e, partName) {
     // 1. 数字のポップアップ (+5)
@@ -659,37 +701,10 @@ function toggleBodyView() {
     }
 }
 
-// 全てのイベント登録をここに集約
-document.addEventListener('DOMContentLoaded', () => {
+
+
+
+window.addEventListener('load', () => {
+    // 確実にDOMとスタイルが読み込まれてから実行
     init();
-
-    // スワイプ検知の整理
-    let startX = 0;
-    document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
-    document.addEventListener('touchend', e => {
-        let diff = e.changedTouches[0].pageX - startX;
-        if (Math.abs(diff) > 70) { // 感度を少し下げて誤爆防止
-            changeDate(diff > 0 ? -1 : 1);
-        }
-    });
-
-    // 部位タップ
-    document.addEventListener('pointerdown', (e) => {
-        const area = e.target.closest('.touch-area');
-        if (area) {
-            e.preventDefault();
-            const partName = area.id.replace('area-', '').replace('part-', '');
-            countUpAtLocation(partName, e);
-
-            // ぷるん！
-            area.style.transition = 'none';
-            area.style.backgroundColor = 'rgba(255, 200, 0, 0.12)'; // 押した瞬間だけ明るい黄色に
-            area.style.transform = 'scale(1.2)';
-
-            setTimeout(() => {
-                area.style.transition = 'all 0.4s ease';
-                updateVisualization(); // 自動的にヒートマップのオレンジに戻る
-            }, 100);
-        }
-    });
 });
