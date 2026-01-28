@@ -20,22 +20,6 @@ function updateVisualization() {
     sessionStorage.setItem('lastViewDate', viewingDate.toISOString());
 }
 
-// 全てのイベント登録をここに集約
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-
-    // スワイプ検知の整理
-    let startX = 0;
-    document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
-    document.addEventListener('touchend', e => {
-        let diff = e.changedTouches[0].pageX - startX;
-        if (Math.abs(diff) > 70) { // 感度を少し下げて誤爆防止
-            changeDate(diff > 0 ? -1 : 1);
-        }
-    });
-
-
-});
 
 function getYMD(date) {
     const d = new Date(date);
@@ -150,24 +134,11 @@ function init() {
     if (document.getElementById('calendar-grid')) renderCalendar();
 }
 
-document.addEventListener('DOMContentLoaded', init);
 
 
 
-// スワイプ検知
-let startX = 0;
-document.addEventListener('touchstart', e => startX = e.touches[0].pageX);
-document.addEventListener('touchend', e => {
-    let diff = e.changedTouches[0].pageX - startX;
-    if (Math.abs(diff) > 50) changeDate(diff > 0 ? -1 : 1);
-});
 
-// これひとつで確実に実行
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+
 // ==========================================
 // 2. 痛みの記録機能
 // ==========================================
@@ -306,54 +277,54 @@ function updateVisualization() {
 }
 
 
-function showTapEffect(e, partName) {
+function showTapEffect(e) {
     // 1. 数字のポップアップ (+5)
     const effect = document.createElement('div');
     effect.className = 'tap-effect';
     effect.innerText = '+5';
     effect.style.position = 'absolute';
-    effect.style.left = (e.pageX - 15) + 'px';
-    effect.style.top = (e.pageY - 30) + 'px';
-    effect.style.color = '#ff9800';
-    effect.style.fontWeight = 'bold';
-    effect.style.fontSize = '20px';
-    effect.style.pointerEvents = 'none';
-    effect.style.zIndex = '1000';
+    effect.style.left = (e.pageX - 20) + 'px';
+    effect.style.top = (e.pageY - 40) + 'px';
+    effect.style.fontSize = '24px';
     document.body.appendChild(effect);
 
+    // あつ森風の「ポーン！」と跳ねるアニメーション
     effect.animate([
-        { transform: 'translateY(0) scale(1)', opacity: 1 },
-        { transform: 'translateY(-50px) scale(1.5)', opacity: 0 }
-    ], { duration: 600, easing: 'ease-out' });
+        { transform: 'translateY(0) scale(0.5) rotate(-10deg)', opacity: 0 },
+        { transform: 'translateY(-30px) scale(1.2) rotate(5deg)', opacity: 1, offset: 0.3 },
+        { transform: 'translateY(-60px) scale(1) rotate(0deg)', opacity: 0 }
+    ], {
+        duration: 800,
+        easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' // 弾むイージング
+    });
 
-    // 2. パーティクル（飛び散る粒）の演出
-    for (let i = 0; i < 6; i++) {
+    // 2. パーティクル（キラキラ）
+    for (let i = 0; i < 8; i++) {
         const p = document.createElement('div');
-        p.style.position = 'absolute';
-        p.style.width = '6px';
-        p.style.height = '6px';
-        p.style.borderRadius = '50%';
-        p.style.backgroundColor = '#ffeb3b'; // 黄色いキラキラ
+        p.className = 'particle';
+        const size = Math.random() * 8 + 4;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
         p.style.left = e.pageX + 'px';
         p.style.top = e.pageY + 'px';
-        p.style.pointerEvents = 'none';
         document.body.appendChild(p);
 
-        const angle = (i / 6) * Math.PI * 2;
-        const velocity = 40 + Math.random() * 20;
+        const angle = (i / 8) * Math.PI * 2;
+        const velocity = 50 + Math.random() * 30;
         const tx = Math.cos(angle) * velocity;
         const ty = Math.sin(angle) * velocity;
 
         p.animate([
             { transform: 'translate(0, 0) scale(1)', opacity: 1 },
             { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
-        ], { duration: 400, easing: 'ease-out' });
+        ], { duration: 500, easing: 'ease-out' });
 
-        setTimeout(() => p.remove(), 400);
+        setTimeout(() => p.remove(), 500);
     }
 
-    setTimeout(() => effect.remove(), 600);
+    setTimeout(() => effect.remove(), 800);
 }
+
 
 document.addEventListener('pointerdown', (e) => {
     const area = e.target.closest('.touch-area');
@@ -362,41 +333,44 @@ document.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     const partName = area.id.replace('area-', '').replace('part-', '');
 
-    // 1回だけ記録を実行（これで10ダメージ問題を解決）
     countUpAtLocation(partName, e);
 
-    // 演出：凹むアニメーション
-    area.style.transition = 'none';
-    area.style.transform = 'scale(0.92)';
+    // 【修正ポイント】transform全体を上書きせず、変数 --s だけを変更する
+    area.style.setProperty('--s', '0.92');
+
     setTimeout(() => {
-        area.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        area.style.transform = 'scale(1)';
+        area.style.setProperty('--s', '1');
     }, 80);
 });
 
+// スワイプ管理用変数
+let startX = 0;
+let startY = 0;
 
-// 左右スワイプ検知
-let touchstartX = 0;
-let touchendX = 0;
+// タッチ開始
+document.addEventListener('touchstart', e => {
+    // 【重要】シルエット部分やボタンを触ったときはスワイプ開始座標をリセットして反応させない
+    if (e.target.closest('.touch-area') || e.target.closest('button')) {
+        startX = 0;
+        return;
+    }
+    startX = e.touches[0].pageX;
+    startY = e.touches[0].pageY;
+}, { passive: true });
 
-
-
+// タッチ終了
 document.addEventListener('touchend', e => {
-    touchendX = e.changedTouches[0].screenX;
-    handleGesture();
+    if (startX === 0) return; // 無視フラグが立っていたら終了
+
+    let diffX = e.changedTouches[0].pageX - startX;
+    let diffY = e.changedTouches[0].pageY - startY;
+
+    // 横に100px以上動き、かつ縦の動きより大きい場合のみ日付変更
+    if (Math.abs(diffX) > 100 && Math.abs(diffX) > Math.abs(diffY)) {
+        changeDate(diffX > 0 ? -1 : 1);
+    }
+    startX = 0;
 });
-
-function handleGesture() {
-    if (touchendX < touchstartX - 50) changeDate(1);  // 左スワイプで翌日
-    if (touchendX > touchstartX + 50) changeDate(-1); // 右スワイプで前日
-}
-
-// ページ読み込み時に実行
-window.addEventListener('DOMContentLoaded', () => {
-    updateVisualization();
-});
-
-
 
 
 function displayPoints() {

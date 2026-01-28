@@ -17,17 +17,20 @@
 <body>
 
 
-    <header class="header">
-        <p>傾向カレンダー</p>
+    <header>
+        <img src="imgs/home-icon-box-4-bg.png" alt="" width="60%"
+            style="margin-top: 10px; display: block; margin: 0 auto;">
     </header>
 
     <main>
         <div class="container">
             <div class="calendar-bg">
                 <div class="calendar-header">
-                    <button onclick="changeMonth(-1)">◀</button>
+                    <button onclick="changeMonth(-1)"
+                        style="background:none; border:none; font-size: 30px; color: #7d421f;">◀</button>
                     <h2 id="current-month">2024年1月</h2>
-                    <button onclick="changeMonth(1)">▶</button>
+                    <button onclick="changeMonth(1)"
+                        style="background:none; border:none; font-size: 30px; color: #7d421f;">▶</button>
                 </div>
                 <div class="weekdays">
                     <div>日</div>
@@ -42,9 +45,9 @@
                 <div id="calendar-grid" class="calendar-grid"></div>
             </div>
 
-            <div class="history-container" style="margin-top: 30px;">
+            <div class="history-container" style="margin-top: 10px;">
                 <div id="chart-link-container"></div>
-                <h2 id="selected-date-label" style="font-size: 1.2em; color: #55bbbf;">🏥 日別の記録</h2>
+                <h2 id="selected-date-label" style="font-size: 1.4em; color: #bf8f55;">日別の記録</h2>
 
                 <div id="history-list">
                     <table class="history-table">

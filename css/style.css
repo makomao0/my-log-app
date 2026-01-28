@@ -70,6 +70,8 @@ body {
 }
 
 
+
+
 /* ゲーム画面全体が1画面に収まっているなら、bodyごと固定するのが確実 */
 
 
@@ -101,6 +103,9 @@ main {
     align-items: flex-start;
     gap: 10px;
     flex-direction: column;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 
@@ -115,7 +120,7 @@ main {
     gap: 10px;
     width: 100%;
     box-sizing: border-box;
-    height: 235px;
+    height: 210px;
 }
 
 
@@ -123,18 +128,15 @@ main {
 /* 中央のパネル：絶対配置(absolute)をやめてグリッドの2列目に配置 */
 .input-panel {
     position: absolute;
-    grid-column: 2;
-    /* 中央に配置 */
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    z-index: 100;
-    min-width: 150px;
-    /* 最小幅を確保 */
     left: 50%;
+    top: 20px;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    /* reverseを消して上から順に並べる */
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
 }
 
 
@@ -191,8 +193,27 @@ main {
     justify-self: center;
 }
 
-.lv-text {
+.face-display img {
+    filter: drop-shadow(0 4px 0px rgba(0, 0, 0, 0.05));
+}
+
+#target-part {
+    margin: 0;
     font-size: 18px;
+    font-weight: bold;
+    color: #7a6a5a;
+}
+
+/* ダメージ表示：UIパーツ風 */
+.lv-text {
+    font-size: 24px;
+    font-weight: 900;
+    background: #fffae6;
+    /* 薄い黄色でアクセント */
+    padding: 4px 15px;
+    border-radius: 15px;
+    border: 2px solid #f0e0a0;
+    color: #8a7a6a;
 }
 
 .btn-tap {
@@ -253,16 +274,14 @@ main {
     margin-top: 40px;
 }
 
-.action-body img {
-    width: 100px;
-    height: auto;
-}
+
 
 .action-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 30px;
     margin-top: 20px;
+    justify-items: center;
 }
 
 .action-section {
@@ -272,37 +291,70 @@ main {
 }
 
 .action-item {
-    border: 2px solid #8ac060;
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
+    width: 100%;
+    height: auto;
+    background: #fff;
+    border: 4px solid #f0f0e8;
+    /* 優しいオフホワイトの枠 */
+    border-radius: 8px;
+    /* 角丸でぷっくり */
+    padding: 6px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #7e6340;
+    box-shadow: 0 2px 0 #e0e0d0;
+    /* ベタ塗りの影（あつ森風） */
+    transition: transform 0.1s, box-shadow 0.1s;
     cursor: pointer;
-    border-radius: 12px;
-    width: 100px;
+}
 
-
-
+/* タップした時に凹む演出 */
+.action-item:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #e0e0d0;
 }
 
 .action-item img {
-    width: 50px;
+    width: 80px;
+    /* アイコンを大きく */
     height: auto;
-
 }
 
-
-
+/* --- 2. モーダルと「わかった！」ボタン --- */
 .detail-card {
-    margin-top: 30%;
+    background: #ffffff;
+    /* 便箋のような薄い黄色 */
+    border: 2px solid #8cc63f;
+    /* あつ森の葉っぱ色 */
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.detail-card h3 {
+    font-size: 28px;
+    /* 特大サイズ */
+    color: #5d9a21;
     text-align: center;
 }
 
 .close {
     float: right;
-    font-size: 28px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.btn-main {
+    display: block;
+    padding: 8px 6px;
+    margin: 10px auto 0;
+    background: #55bbbf;
+    /* あつ森のメインUI色（青緑） */
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 30px;
     cursor: pointer;
 }
 
@@ -333,6 +385,8 @@ main {
     text-align: center;
     /* パディングも調整 */
     font-size: 10px;
+    touch-action: manipulation;
+    /* ダブルタップズームを防止 */
 }
 
 .nav-bar :hover {
@@ -341,19 +395,19 @@ main {
     transition: 0.5s;
 }
 
-
 .point-display {
     color: #55bbbf;
-    font-size: 18px;
-
-    border: 2px solid #55bbbf;
-    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 800;
+    background-color: #fff;
+    border: 4px solid #e8f5f5;
+    border-radius: 40px;
     width: 140px;
-    text-align: center;
-    height: 55px;
+    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 4px 0 #d1e8e8;
 }
 
 
@@ -379,6 +433,16 @@ main {
 
 
 
+.date-header {
+    width: 50%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+
 
 /* --- シルエットエリア --- */
 .silhouette-container {
@@ -389,6 +453,8 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
+    /* ダブルタップズームなどを防ぎ、タップの反応を良くする */
 }
 
 /* --- タップ判定エリアの修正版 --- */
@@ -413,8 +479,10 @@ main {
     border: none;
     box-shadow: none;
     filter: none;
-    transition: all 0.4s ease;
-    /* 変化をヌルっとさせる */
+    -webkit-tap-highlight-color: transparent;
+    /* タップ時の青い枠を消す */
+    transform: rotate(var(--r, 0deg)) scale(var(--s, 1));
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* 部位名のテキスト(span)をデフォルトで非表示にする */
@@ -477,8 +545,7 @@ main {
     width: 20%;
     /* 少し広めに */
     height: 25%;
-    transform: rotate(30deg);
-    /* 少し角度をつける */
+    --r: 30deg;
 }
 
 .area-arm-r {
@@ -487,7 +554,7 @@ main {
     width: 20%;
     /* 少し広めに */
     height: 25%;
-    transform: rotate(-30deg);
+    --r: -30deg;
 }
 
 /* ▼ 胸（むね） ▼ */
@@ -521,14 +588,14 @@ main {
 
 /* 切替ボタンの装飾例 */
 #view-flip-btn {
-    position: absolute;
     top: -50px;
     left: 10px;
     background: #8d6e63;
     color: white;
     border: none;
-    padding: 8px 15px;
+    padding: 10px 15px;
     border-radius: 20px;
+    font-size: 18px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -585,15 +652,20 @@ main {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(85, 187, 191, 0.2);
-    border: none;
+    background-color: #e8e1d1;
+    border: 3px solid #f3e1cb;
+    color: #8a7a6a;
     border-radius: 50%;
     width: 44px;
     height: 44px;
-    color: var(--main-teal);
     font-size: 20px;
-    z-index: 100;
+    cursor: pointer;
+    z-index: 110;
+    box-shadow: 0 4px 0 #e8dcd1;
+    transition: transform 0.1s, box-shadow 0.1s;
 }
+
+
 
 .prev-btn {
     left: -50px;
@@ -668,6 +740,15 @@ main {
 
 .wobble {
     animation: jelly-wobble 0.4s ease-in-out;
+}
+
+/* キラキラ粒（パーティクル） */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background-color: #ffeb3b;
+    pointer-events: none;
+    z-index: 999;
 }
 
 /* 数字（+5）の見た目を少し可愛く */

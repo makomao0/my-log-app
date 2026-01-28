@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>co:me-login</title>
+
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100%;
+            background-image: url('imgs/login-bg-sb.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: #f0f0f0;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        /* mainを画面いっぱいのコンテナにする */
+        main {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* 垂直方向の中央 */
+            align-items: center;
+            /* 水平方向の中央 */
+        }
+
+        .login-button {
+            /* 真ん中より少し下にするために、上の余白を少し増やす */
+            margin-top: 300px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        /* 軽くクリック感を出す（お好みで） */
+        .login-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="login-button">
+            <a href="index.html"><img src="imgs/login-button.png" alt="Let's co:me" style="width: 230px;"></a>
+        </div>
+    </main>
+</body>
+
+</html>

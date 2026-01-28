@@ -163,7 +163,7 @@ function updateHistoryTable(targetDateStr) {
                         ${data.records.length}回 の記録
                     </button>
                 </td>
-                <td style="text-align: right; font-weight: bold;">Lv.${data.totalLv}</td>
+                <td style="text-align: centert; font-weight: bold;">Lv.${data.totalLv}</td>
             </tr>
         `;
     }).join('');

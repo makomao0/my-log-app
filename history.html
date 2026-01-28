@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>co:me-処方箋箋</title>
+    <title>co:me-お薬手帳</title>
 
     <link rel="stylesheet" href="./css/chart.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -15,6 +15,7 @@
 
     <style>
         /* 下部ナビゲーション */
+
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -53,24 +54,25 @@
 
 <body>
     <main>
-        <div class="history-container">
-            <h2>🏥 お薬手帳（痛みログ）</h2>
-            <div style="text-align: center;">
+        <div>
+            <div style="display: flex; justify-content: center;">
+                <img src="imgs/home-icon-box-2-bg-sk.png" alt="" style="width: 60%; margin: 10px;">
+            </div>
+            <div class=" history-body" style=" text-align: center;">
                 <button onclick="viewDate = new Date(); updateDisplay();"
-                    style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;">
+                    style="background: #55bbbf; border: 1px solid #b6bbc1; color: rgb(255, 255, 255); padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;">
                     今日に戻る
                 </button>
             </div>
             <div class="date-controller"
-                style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0;">
+                style="display: flex; justify-content: center; align-items: center; gap: 20px; margin:10px 0 10px 0;">
                 <button onclick="changeDate(-1)"
-                    style="background:none; border:none; font-size: 20px; cursor:pointer;">◀</button>
+                    style="background:none; border:none; font-size: 20px; cursor:pointer; color: #55bbbf;">◀</button>
                 <h3 id="current-display-date" style="margin: 0; color: #55bbbf;">2024/01/22</h3>
                 <button onclick="changeDate(1)"
-                    style="background:none; border:none; font-size: 20px; cursor:pointer;">▶</button>
+                    style="background:none; border:none; font-size: 20px; cursor:pointer; color: #55bbbf;">▶</button>
             </div>
 
-            <p class="history-desc">これまでの記録を先生に見せてね！</p>
 
             <div id="damage-chart-root" class="chart-section">
             </div>
@@ -78,10 +80,10 @@
             <div id="history-list">
                 <table class="history-table">
                     <thead>
-                        <tr>
+                        <tr style="text-align: left;">
                             <th>部位</th>
                             <th>記録された日時</th>
-                            <th style="text-align: right;">合計Lv</th>
+                            <th>合計Lv</th>
                         </tr>
                     </thead>
                     <tbody id="history-body">

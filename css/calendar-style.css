@@ -1,6 +1,6 @@
 :root {
     --bg: #fdba1d;
-    --text: #000000;
+    --text: #7d421f;
     --border: #eeeeee;
     --accent: #f5f5f5;
 
@@ -10,8 +10,8 @@
     --card-bg: #ffffff;
     --light-bg: #fafafa;
     --light-gray: #eee;
-    --text-light: #888;
-    --text-muted: #555;
+    --text-light: #bb8d5a;
+    --text-muted: #7d421f;
     --input-border: #eefeff;
 }
 
@@ -119,11 +119,11 @@ main {
 .cal-day.active {
     background-color: #fff9e6b7;
     /* 記録がある日 */
-    border-color: #ff9900;
+    border-color: #ff9100;
 }
 
 .cal-day.today {
-    outline: 3px solid #e16c6a;
+    outline: 3px solid #c38237;
     /* 今日を強調 */
 }
 
@@ -142,7 +142,7 @@ main {
 
 /* カレンダーの選択中スタイル */
 .cal-day.selected {
-    background-color: #f1c25d !important;
+    background-color: #de9f68 !important;
     color: white;
     border-radius: 50%;
 }
@@ -165,7 +165,7 @@ main {
     background: #fff;
     border-radius: 15px;
     padding: 15px;
-    border: 2px solid #55bbbf;
+    border: 2px solid #bf7855;
     scroll-snap-align: start;
     /* スクロールした時にこの位置で止まる */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -180,11 +180,11 @@ main {
 
 .card-time {
     font-size: 0.8rem;
-    color: #888;
+    color: #c38237;
 }
 
 .card-badge {
-    background: #55bbbf;
+    background: #c38237;
     color: white;
     font-size: 0.7rem;
     padding: 2px 8px;
@@ -194,11 +194,11 @@ main {
 
 .card-body {
     font-size: 1rem;
-    color: #333;
+    color: #c38237;
 }
 
 .card-body strong {
-    color: #ea7824;
+    color: #c38237;
     /* primaryカラー */
 }
 
@@ -208,13 +208,13 @@ main {
     padding: 15px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 15px;
-    border: 2px solid #55bbbf;
+    border: 2px solid #bf8655;
 }
 
 .event-date-header {
     font-weight: bold;
-    color: #333;
-    border-bottom: 2px solid #55bbbf;
+    color: #893f12;
+    border-bottom: 2px solid #bf9555;
     margin-bottom: 10px;
     padding-bottom: 5px;
 }
@@ -229,7 +229,7 @@ main {
 
 .event-time {
     font-size: 0.8rem;
-    color: #666;
+    color: #623807;
     min-width: 50px;
 }
 
@@ -248,12 +248,12 @@ main {
     text-align: right;
     font-size: 0.9rem;
     font-weight: bold;
-    color: #55bbbf;
+    color: #bf9d55;
 }
 
 .no-event {
     text-align: center;
-    color: #999;
+    color: #999999;
     padding: 20px;
 }
 
@@ -262,7 +262,7 @@ main {
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-weight: bold;
-    color: #666;
+    color: #c0640e;
     margin-bottom: 5px;
 }
 
@@ -348,13 +348,14 @@ textarea {
 }
 
 .btn-submit {
-    background: var(--primary);
+    background: #55bbbf;
     color: white;
     border: none;
     padding: 12px 25px;
     border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
+    font-size: 18px;
 }
 
 .box {
@@ -447,7 +448,7 @@ textarea {
 
 .highlight-post {
     animation: highlightFade 2s ease-out;
-    border: 2px solid #e1ff4d !important;
+    border: 2px solid #986919 !important;
     z-index: 5;
 }
 
@@ -602,8 +603,7 @@ textarea {
 .btn-edit {
     background: none;
     border: none;
-    color: #4a90e2;
-    /* 青色 */
+    color: #e2b94a;
     font-size: 0.85rem;
     cursor: pointer;
     margin-left: 10px;
@@ -872,8 +872,9 @@ textarea {
 /* 部位のタグ（お薬手帳風） */
 .part-tag {
     display: inline-block;
-    background: #e0f7f8;
-    color: #00838f;
+    background: #ffffff;
+    border: #e89229 1px solid;
+    color: #c57a12;
     padding: 3px 10px;
     border-radius: 15px;
     font-size: 0.9em;
@@ -887,7 +888,7 @@ textarea {
     border-radius: 10px;
     padding: 30px;
     text-align: center;
-    color: #94a3b8;
+    color: #b8aa94;
     font-size: 0.9em;
 }
 
@@ -911,10 +912,7 @@ textarea {
     position: relative;
 }
 
-.cal-day.selected {
-    background-color: #ffeb3b;
-    border: 2px solid #55bbbf;
-}
+
 
 .mark {
     position: absolute;
@@ -932,9 +930,9 @@ textarea {
 
 .history-table th,
 .history-table td {
-    padding: 12px 8px;
+    padding: 12px;
     border-bottom: 1px solid #eee;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .no-data-msg {
@@ -976,7 +974,7 @@ textarea {
 }
 
 .modal-content button {
-    background: #55bbbf;
+    background: #a57d5b;
     color: #fff;
     border: none;
     padding: 10px 20px;

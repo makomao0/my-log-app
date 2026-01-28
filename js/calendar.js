@@ -92,7 +92,7 @@ function updateHistoryTable() {
     if (!body) return;
     if (linkContainer) linkContainer.innerHTML = '';
 
-    label.innerText = `🏥 ${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日の記録`;
+    label.innerText = `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日の記録`;
 
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const targetKey = formatDate(selectedDate);
@@ -125,10 +125,10 @@ function updateHistoryTable() {
     if (linkContainer) {
         const dateParam = formatDate(selectedDate);
         linkContainer.innerHTML = `
-            <div style="text-align: center; margin-top: 20px;">
+            <div style="text-align: center;">
                 <button class="btn-submit" onclick="location.href='history.html?date=${dateParam}'" 
-                        style="padding: 12px 25px; border-radius: 25px;">
-                    📈 この日のグラフを見る
+                        style="padding: 16px 30px; border-radius: 30px;">
+                     この日のグラフを見る
                 </button>
             </div>
         `;
@@ -145,7 +145,7 @@ function updateHistoryTable() {
                     ${data.records.length}回 の記録
                 </button>
             </td>
-            <td style="text-align: right; font-weight: bold; color: #ff6b6b;">Lv.${data.totalLv}</td>
+            <td style="text-align:center; font-weight: bold; color: #f37e18;">Lv.${data.totalLv}</td>
         </tr>
     `;
     }).join('');

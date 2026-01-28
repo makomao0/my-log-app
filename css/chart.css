@@ -20,6 +20,21 @@ textarea {
     font-family: "Kosugi Maru", sans-serif;
 }
 
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0 15px;
+    /* 左右に少し余裕を */
+    background-image: url(../imgs/home-bg.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    color: var(--text);
+    box-sizing: border-box;
+}
+
 
 
 /* --- チャートコンテナ --- */
@@ -143,11 +158,11 @@ textarea {
 .history-table th {
     position: sticky;
     top: 0;
-    background: #f1f5f9;
+    background: #55bbbf;
     /* 落ち着いたグレーに変更 */
-    color: #475569;
+    color: #ffffff;
     padding: 10px;
-    font-size: 0.85em;
+    font-size: 1em;
     z-index: 20;
     border-bottom: 2px solid var(--chart-grid);
 }
@@ -155,13 +170,13 @@ textarea {
 .history-table td {
     padding: 12px 8px;
     border-bottom: 1px solid #f1f5f9;
-    font-size: 0.85em;
+    font-size: 1em;
 }
 
 /* 部位タグ */
 .part-tag {
-    background: #fff3e0;
-    color: #e65100;
+    border: #e89229 1px solid;
+    color: #c57a12;
     padding: 3px 8px;
     border-radius: 6px;
     font-size: 0.8em;
