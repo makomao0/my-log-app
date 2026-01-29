@@ -4,6 +4,7 @@
 const STORAGE_KEY = 'kodama_logs_v2';
 const POINT_KEY = 'user_points';
 const LEVEL_KEY = 'currentLevel';
+const POINT_STORAGE_KEY = 'user_total_points';
 
 let displayDate = new Date(); // カレンダー画面用
 let isBackView = false;       // 背面表示フラグ
@@ -128,6 +129,7 @@ function closeDetail() {
 // ==========================================
 
 function init() {
+    updateDisplayUserPoints(); // ここでポイントを表示
     displayPoints();
     if (document.getElementById('current-date-display')) updateVisualization();
     if (document.getElementById('history-body')) renderHistory();
@@ -257,10 +259,10 @@ function updateVisualization() {
             const blurSize = 5 + (intensity * 15);   // 5px〜20px
 
             // 背景色
-            targetEl.style.backgroundColor = `rgba(255, 69, 0, ${opacity})`;
+            targetEl.style.backgroundColor = `rgba(249, 202, 120, ${opacity})`;
 
             // 外側の光（これが「ボワッ」とした質感を出す）
-            targetEl.style.boxShadow = `0 0 ${blurSize}px ${blurSize / 2}px rgba(255, 140, 0, ${opacity})`;
+            targetEl.style.boxShadow = `0 0 ${blurSize}px ${blurSize / 2}px rgba(249, 202, 120, ${opacity})`;
 
             // 全体のぼかし（これが反映されない場合、親要素の overflow: hidden を疑う）
             targetEl.style.filter = `blur(${Math.max(2, blurSize / 3)}px)`;
@@ -270,10 +272,7 @@ function updateVisualization() {
         }
     }
 
-    const targetPartEl = document.getElementById('target-part');
-    if (targetPartEl) {
-        targetPartEl.innerText = hasLogForThisDay ? "痛いところを押してね" : "この日の記録はありません";
-    }
+
 }
 
 
@@ -288,7 +287,6 @@ function showTapEffect(e) {
     effect.style.fontSize = '24px';
     document.body.appendChild(effect);
 
-    // あつ森風の「ポーン！」と跳ねるアニメーション
     effect.animate([
         { transform: 'translateY(0) scale(0.5) rotate(-10deg)', opacity: 0 },
         { transform: 'translateY(-30px) scale(1.2) rotate(5deg)', opacity: 1, offset: 0.3 },
@@ -326,6 +324,9 @@ function showTapEffect(e) {
 }
 
 
+// タイマーを管理する変数を外側に置いておく（チカチカ防止用）
+let messageTimer;
+
 document.addEventListener('pointerdown', (e) => {
     const area = e.target.closest('.touch-area');
     if (!area) return;
@@ -333,15 +334,40 @@ document.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     const partName = area.id.replace('area-', '').replace('part-', '');
 
+    // 1. spanの中身（あたま、おなか等）を取得
+    const labelName = area.querySelector('span') ? area.querySelector('span').innerText : partName;
+
+    // 2. 「〇〇を記録しました」という文章を作る
+    const message = `${labelName}を記録しました`;
+
+    // 3. 表示用の要素を書き換える
+    const targetPartEl = document.getElementById('target-part');
+    if (targetPartEl) {
+        // すでに動いているタイマーがあればキャンセル（連続タップ対策）
+        clearTimeout(messageTimer);
+
+        targetPartEl.innerText = message;
+        targetPartEl.style.color = "#d98817"; // 強調色
+        targetPartEl.style.fontWeight = "bold";
+
+        // 3秒後に元の案内に戻す
+        messageTimer = setTimeout(() => {
+            targetPartEl.innerText = "痛いところを押してね";
+            targetPartEl.style.color = "";
+            targetPartEl.style.fontWeight = "";
+        }, 3000);
+    }
+
+    // 既存の記録・エフェクト処理
     countUpAtLocation(partName, e);
 
-    // 【修正ポイント】transform全体を上書きせず、変数 --s だけを変更する
+    // アニメーション（縮小）
     area.style.setProperty('--s', '0.92');
-
     setTimeout(() => {
         area.style.setProperty('--s', '1');
     }, 80);
 });
+
 
 // スワイプ管理用変数
 let startX = 0;
@@ -608,3 +634,76 @@ window.addEventListener('load', () => {
     // 確実にDOMとスタイルが読み込まれてから実行
     init();
 });
+
+
+
+// index.html側での表示例
+function displayPoints() {
+    const el = document.getElementById('point-display');
+    const pts = localStorage.getItem('user_total_points') || '0';
+    if (el) el.innerText = pts;
+}
+
+// ==========================================
+// ポイント表示・更新（役割ごとに分離）
+// ==========================================
+
+// 1. user_points (POINT_KEY) の表示
+function updateDisplayUserPoints() {
+    const el = document.getElementById('point-display');
+    const pts = localStorage.getItem(POINT_KEY) || '0';
+    if (el) el.innerText = pts;
+}
+
+// 2. user_total_points (POINT_STORAGE_KEY) の表示
+// ※もし別の場所に表示しているならこちらを使う
+function updateDisplayTotalPoints() {
+    const el = document.getElementById('total-points-display'); // 別のIDがある場合
+    const totalPts = localStorage.getItem(POINT_STORAGE_KEY) || '0';
+    if (el) el.innerText = totalPts;
+}
+
+// これを1つだけ残す
+function countUpAtLocation(part, event) {
+    const damage = 5;
+    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    // 1. ログ保存
+    logs.push({
+        date: new Date().toISOString(),
+        details: { [part]: damage },
+        totalLevel: damage
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+
+    // 2. ポイント加算（両方のキーを更新）
+    let pts = parseInt(localStorage.getItem(POINT_KEY) || '0');
+    localStorage.setItem(POINT_KEY, (pts + 1).toString());
+
+    let total = parseInt(localStorage.getItem(POINT_STORAGE_KEY) || '0');
+    localStorage.setItem(POINT_STORAGE_KEY, (total + 1).toString());
+
+    // 3. UI表示更新（ポイント）
+    updateDisplayUserPoints();
+
+    // 4. UI表示更新（今日の合計ダメージ）
+    const todayStr = new Date().toLocaleDateString();
+    const todayTotal = logs
+        .filter(l => new Date(l.date).toLocaleDateString() === todayStr)
+        .reduce((sum, l) => sum + l.totalLevel, 0);
+
+    const lvEl = document.getElementById('lv');
+    if (lvEl) {
+        lvEl.innerText = todayTotal;
+        // 数字が更新された時に少し跳ねるアニメーション（任意）
+        lvEl.animate([
+            { transform: 'scale(1.1)', color: '#65261a' },
+            { transform: 'scale(1)', color: '' }
+        ], { duration: 200 });
+    }
+
+    // 5. その他更新（顔、ヒートマップ、エフェクト）
+    updateFace(todayTotal);
+    updateVisualization();
+    if (event) showTapEffect(event);
+}

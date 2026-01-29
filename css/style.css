@@ -24,6 +24,15 @@ textarea {
     font-family: "Kosugi Maru", sans-serif;
 }
 
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* これで絶対にはみ出さない */
+}
+
 /* 共通ナビゲーションバー */
 .nav-bar {
     position: fixed;
@@ -67,6 +76,8 @@ body {
     background-attachment: fixed;
     background-repeat: no-repeat;
     font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
 
@@ -79,12 +90,17 @@ body {
 /* アクション画面のメイン部分に余白を追加 */
 /* メインコンテンツの包み */
 main {
+    flex: 1;
+    /* ヘッダーとフッター以外の残りの高さをすべて使う */
     display: flex;
     flex-direction: column;
+
+    /* 要素間の隙間を自動調整 */
     align-items: center;
-    width: 100%;
-    /* ナビゲーションバーに隠れないよう、下に大きな余白を作る */
+    padding: 10px;
     box-sizing: border-box;
+    min-height: 0;
+    /* flex内の見切れ防止の魔法の呪文 */
 }
 
 /* パズル盤面とドックエリアをスクロールさせない */
@@ -97,16 +113,6 @@ main {
 
 
 
-.top-point-panel {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 10px;
-    flex-direction: column;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-}
 
 
 /* HOME関連 */
@@ -114,29 +120,35 @@ main {
 .top-center-header {
     display: grid;
     /* 左(1fr)・中央(auto)・右(1fr) の3つのエリアを作る */
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 1fr;
     align-items: start;
     padding: 10px 10px 0px;
     gap: 10px;
     width: 100%;
     box-sizing: border-box;
-    height: 200px;
+    height: 130px;
+    width: 100%;
 }
 
 
 
 /* 中央のパネル：絶対配置(absolute)をやめてグリッドの2列目に配置 */
 .input-panel {
-    position: absolute;
-    left: 50%;
-    top: 20px;
-    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
-    /* reverseを消して上から順に並べる */
     align-items: center;
     gap: 10px;
     z-index: 100;
+
+    /* 真ん中に配置するための設定 */
+    position: absolute;
+    left: 50%;
+    /* 左から50%の位置へ */
+    transform: translate(-50%, -50%);
+    /* 自身の幅と高さの半分だけ戻してピッタリ中央へ */
+
+    margin-top: 60px;
+    /* margin-topがあると中央からズレるので0にする */
 }
 
 
@@ -199,21 +211,19 @@ main {
 
 #target-part {
     margin: 0;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
     color: #7a6a5a;
 }
 
 /* ダメージ表示：UIパーツ風 */
 .lv-text {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 900;
-    background: #fffae6;
-    /* 薄い黄色でアクセント */
-    padding: 4px 15px;
-    border-radius: 15px;
-    border: 2px solid #f0e0a0;
     color: #8a7a6a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .btn-tap {
@@ -233,8 +243,6 @@ main {
 .top-items a.icon-box:nth-of-type(2) {
     grid-column: 1;
 }
-
-
 
 
 
@@ -400,27 +408,26 @@ main {
     font-size: 20px;
     font-weight: 800;
     background-color: #fff;
-    border: 4px solid #e8f5f5;
-    border-radius: 20px;
-    width: 120px;
-    height: 60px;
+    border: 2px solid #a5c9c9;
+    width: 100px;
+    height: 40px;
     display: flex;
-    box-shadow: 0 4px 0 #d1e8e8;
-    justify-content: space-evenly;
-    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    margin-top: 10px;
 }
 
-.point-display p {
-    padding-top: 15px;
-}
+.top-icon-point {
 
+    display: flex;
+    flex-direction: column;
+}
 
 
 #point-display {
     margin: 5px;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-    font-size: 40px;
+    font-size: 24px;
 }
 
 /* 右側：アイコンボタン */
@@ -431,30 +438,54 @@ main {
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
+    z-index: 100;
 }
 
 
 
 .date-header {
-    width: 50%;
     display: flex;
     flex-wrap: nowrap;
     flex-direction: column;
     align-items: center;
+    padding: 10px;
 }
 
 
+.large-date {
+    font-size: 85px;
+    color: rgb(121, 59, 12);
+    font-weight: 900;
+    margin: 10px;
+}
 
+/* 6. 「今日を表示」「うしろを表示」ボタンを横並びに */
+.date-header-floating {
+    width: 100%;
+    max-width: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    /* ボタン同士の間隔 */
+    margin-bottom: 10px;
+}
+
+#today-reset-btn,
+#view-flip-btn {
+    position: static !important;
+    /* 絶対配置を解除して並べる */
+    margin: 0 !important;
+}
 
 /* --- シルエットエリア --- */
 .silhouette-container {
     position: relative;
-    width: 100%;
-    max-width: 250px;
-    margin: 20px auto;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    margin: 20px auto;
     touch-action: manipulation;
     /* ダブルタップズームなどを防ぎ、タップの反応を良くする */
 }

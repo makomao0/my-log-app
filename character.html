@@ -265,61 +265,46 @@
     <script>
         let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
         let current = 'cat';
+        const POINT_STORAGE_KEY = 'user_total_points'; // 常にこのキーを使用
 
+        // --- キャラクター設定 ---
         const charData = {
             cat: {
                 bg: 'imgs/character/room.png',
                 body: 'imgs/character/cat_body.png',
                 face: 'imgs/character/cat_face.png',
-                config: { isCircle: false, speed: 0.05, eyeRangeX: 8, eyeRangeY: 4, rotate: 0.03, eyeTop: '42%', eyeGap: '45px', eyeRotate: '-8deg', eyeSize: 1, bodyZ: 1 }
+                config: { isCircle: false, speed: 0.05, eyeRangeX: 8, eyeRangeY: 4, rotate: 0.03, eyeTop: '42%', eyeGap: '45px', eyeRotate: '0deg', eyeSize: 1, bodyZ: 1 }
             },
             bird: {
                 bg: 'imgs/character/room.png',
                 body: 'imgs/character/bird_body.png',
                 face: 'imgs/character/bird_face.png',
-                config: { isCircle: true, speed: 0.1, eyeRangeX: 10, eyeRangeY: 10, rotate: 0.08, eyeTop: '36%', eyeGap: '40px', eyePaddingRight: '40px', ballSize: 1.8, eyeRotate: '4deg', eyeSize: 0.7, bodyZ: 1 }
+                config: { isCircle: true, speed: 0.1, eyeRangeX: 10, eyeRangeY: 10, rotate: 0.08, eyeTop: '36%', eyeGap: '40px', eyePaddingRight: '40px', ballSize: 1.9, eyeRotate: '4deg', eyeSize: 0.7, bodyZ: 1 }
             },
             sheep: {
                 bg: 'imgs/character/room.png',
                 body: 'imgs/character/sheep_body.png',
                 face: 'imgs/character/sheep_face.png',
-                config: { isCircle: false, speed: 0.02, eyeRangeX: 5, eyeRangeY: 5, rotate: 0.01, eyeTop: '40%', eyeGap: '45px', eyeRotate: '-4deg', eyeSize: 0.78, bodyZ: 3 }
+                config: { isCircle: false, speed: 0.02, eyeRangeX: 3, eyeRangeY: 3, rotate: 0.01, eyeTop: '40%', eyeGap: '45px', eyeRotate: '0deg', ballSize: 1, eyeSize: 0.78, bodyZ: 3 }
             }
         };
 
-        // 着せ替えデータ
+        // --- クローゼットアイテム設定 ---
         const CLOSET_ITEMS = [
-            {
-                id: 'hat_basic',
-                name: 'ぼうし',
-                price: 50,
-                img: 'imgs/character/hat.png',
-                // ★ 追加：微調整用
-                offsetY: '-60px', // 上にずらす
-                offsetX: '0px',
-                scale: '0.8'      // 少し大きく
-            },
-            {
-                id: 'ribbon_red',
-                name: 'リボン',
-                price: 30,
-                img: 'imgs/character/ribbon.png',
-                offsetY: '-75px',
-                offsetX: '70px',
-                scale: '0.8'
-            },
-            {
-                id: 'megane',
-                name: 'メガネ',
-                price: 10,
-                img: 'imgs/character/glasses.png',
-                offsetY: '10px',
-                offsetX: '0px',
-                scale: '0.5'
-            }
+            { id: 'hat_basic', name: 'ぼうし', price: 50, img: 'imgs/character/hat.png', offsetY: '-60px', offsetX: '0px', scale: '0.8' },
+            { id: 'ribbon_red', name: 'リボン', price: 30, img: 'imgs/character/ribbon.png', offsetY: '-75px', offsetX: '70px', scale: '0.8' },
+            { id: 'megane', name: 'メガネ', price: 10, img: 'imgs/character/glasses.png', offsetY: '-10px', offsetX: '0px', scale: '0.5' }
         ];
 
-        let userPoints = parseInt(localStorage.getItem('log_points') || '100');
+        // --- データの読み込みと修復 ---
+        let userPoints = parseInt(localStorage.getItem(POINT_STORAGE_KEY) || '0');
+
+        // ★ 重要：マイナスになっていたら0に戻す救済処置
+        if (userPoints < 0) {
+            userPoints = 0;
+            localStorage.setItem(POINT_STORAGE_KEY, '0');
+        }
+
         let ownedItems = JSON.parse(localStorage.getItem('owned_items') || '[]');
         let equippedData = JSON.parse(localStorage.getItem('equipped_data') || '{"cat":"","bird":"","sheep":""}');
 
@@ -347,9 +332,7 @@
                 const ball = eyeBalls[index];
                 const s = conf.eyeSize;
                 const bs = conf.ballSize || 1.0;
-
                 wrap.style.display = (conf.isSingleEye && index === 1) ? 'none' : 'flex';
-
                 if (conf.isCircle) {
                     wrap.style.width = wrap.style.height = (60 * s) + 'px';
                     ball.style.width = ball.style.height = (30 * s * bs) + 'px';
@@ -363,10 +346,10 @@
             const activeBtn = document.getElementById('btn-' + id);
             if (activeBtn) activeBtn.classList.add('active');
 
-            updateEquipDisplay(); // 装備の見た目を更新
+            updateEquipDisplay();
         }
 
-        // --- 着せ替えロジック ---
+        // クローゼット関連
         function openCloset() {
             document.getElementById('closet-modal').style.display = 'flex';
             renderCloset();
@@ -399,10 +382,12 @@
             if (userPoints >= price) {
                 userPoints -= price;
                 ownedItems.push(id);
-                localStorage.setItem('log_points', userPoints);
+                localStorage.setItem(POINT_STORAGE_KEY, userPoints);
                 localStorage.setItem('owned_items', JSON.stringify(ownedItems));
                 renderCloset();
-            } else { alert("ポイントが足りないよ！"); }
+            } else {
+                alert("ポイントが足りないよ！パズルをして貯めてきてね。");
+            }
         }
 
         function equipItem(imgSrc) {
@@ -415,27 +400,18 @@
         function updateEquipDisplay() {
             const itemLayer = document.getElementById('equipped-item');
             const currentImg = equippedData[current];
-
             if (currentImg) {
-                // 現在装備しているアイテムの情報をCLOSET_ITEMSから探す
                 const itemInfo = CLOSET_ITEMS.find(item => item.img === currentImg);
-
                 itemLayer.style.backgroundImage = `url(${currentImg})`;
                 itemLayer.style.display = 'block';
-
                 if (itemInfo) {
-                    // 微調整データを反映させる
-                    // scaleは「大きさ」、translateは「位置」
-                    itemLayer.style.transform = `
-                translate(${itemInfo.offsetX || '0px'}, ${itemInfo.offsetY || '0px'}) 
-                scale(${itemInfo.scale || '1'})
-            `;
+                    itemLayer.style.transform = `translate(${itemInfo.offsetX || '0px'}, ${itemInfo.offsetY || '0px'}) scale(${itemInfo.scale || '1'})`;
                 }
             } else {
                 itemLayer.style.display = 'none';
             }
         }
-        // --- アニメーションループ ---
+
         function loop() {
             const face = document.getElementById('face');
             const eyeL = document.getElementById('eyeL');
@@ -467,7 +443,6 @@
             mouseX = touch.clientX; mouseY = touch.clientY;
         }, { passive: true });
 
-        // 初期化
         changeChar('cat');
         loop();
     </script>
