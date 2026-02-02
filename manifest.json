@@ -8,13 +8,13 @@
     "description": "痛みの箇所を視覚的に記録してケアをサポートするアプリ",
     "icons": [
         {
-            "src": "imgs/icons/home-icon.png",
+            "src": "imgs/character/bird.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "imgs/icons/home-icon.png",
+            "src": "imgs/character/bird.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"

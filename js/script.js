@@ -56,7 +56,7 @@ const MEDICAL_GUIDE = {
     '休む': {
         title: '休む',
         text: '一番の薬は睡眠です。スマホを置いて、暗い部屋でゆっくり休みましょう。',
-        mapSearch: '近くのホテル',
+        mapSearch: '近くの休憩所',
         webSearch: '早く寝るためのリラックス方法'
     },
     '水分': {
@@ -105,13 +105,13 @@ function showDetail(type) {
     if (guide && modal) {
         title.innerText = guide.title;
         let content = `<p>${guide.text}</p>`;
-        content += `<div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">`;
+        content += `<div class="modal-action-group">`;
 
         if (guide.mapSearch) {
-            content += `<button style="..." onclick="openGoogleMap('${guide.mapSearch}')">📍 ${guide.mapSearch}をマップで探す</button>`;
+            content += `<button class="modal-button" onclick="openGoogleMap('${guide.mapSearch}')">📍 ${guide.mapSearch}をマップで探す</button>`;
         }
         if (guide.webSearch) {
-            content += `<button style="..." onclick="openGoogleSearch('${guide.webSearch}')">🔍 「${guide.webSearch}」を調べる</button>`;
+            content += `<button class="modal-button" onclick="openGoogleSearch('${guide.webSearch}')">🔍 「${guide.webSearch}」を調べる</button>`;
         }
         content += `</div>`;
         text.innerHTML = content;
@@ -476,16 +476,16 @@ function updateFace(lv) {
     // 数値の判定
     if (lv === 0) iconNum = 1;
     else if (lv < 50) iconNum = 2;
-    else if (lv < 100) iconNum = 3;
-    else if (lv < 200) iconNum = 4;
-    else if (lv < 300) iconNum = 5;
-    else if (lv < 400) iconNum = 6;
-    else if (lv < 500) iconNum = 7;
-    else if (lv < 600) iconNum = 8;
-    else if (lv < 700) iconNum = 9;
+    else if (lv < 100) iconNum = 15;
+    else if (lv < 200) iconNum = 16;
+    else if (lv < 300) iconNum = 17;
+    else if (lv < 400) iconNum = 5;
+    else if (lv < 500) iconNum = 9;
+    else if (lv < 600) iconNum = 12;
+    else if (lv < 700) iconNum = 13;
     else if (lv < 800) iconNum = 10;
     else if (lv < 900) iconNum = 11;
-    else if (lv < 1000) iconNum = 12;
+    else if (lv < 1000) iconNum = 7;
     else iconNum = 5; // 1000以上はとりあえず5
 
     // 画像をセット
@@ -706,4 +706,6 @@ function countUpAtLocation(part, event) {
     updateFace(todayTotal);
     updateVisualization();
     if (event) showTapEffect(event);
+
 }
+

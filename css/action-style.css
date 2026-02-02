@@ -28,6 +28,7 @@ textarea {
     font-family: "Kosugi Maru", sans-serif;
 }
 
+
 body {
     width: 100%;
     min-height: 100vh;
@@ -100,6 +101,30 @@ main {
     transition: 0.5s;
 }
 
+
+.action-body {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+    justify-items: center;
+}
+
+.action-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 
 .cal-day {
@@ -267,6 +292,66 @@ main {
     z-index: 99;
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* 追加アクションボタン（マップ・検索） */
+.modal-action-group {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-button {
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid #e0e0ce;
+    background: #fdfdfd;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-button:hover {
+    background: #f0f9e8;
+    border-color: #8cc63f;
+}
+
+/* アニメーション */
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    border: 3px solid var(--border);
+}
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -301,6 +386,43 @@ main {
     color: var(--text-light);
     text-align: center;
     margin-bottom: 20px;
+}
+
+/* --- 2. モーダルと「わかった！」ボタン --- */
+.detail-card {
+    background: #ffffff;
+    /* 便箋のような薄い黄色 */
+    border: 2px solid #8cc63f;
+    /* あつ森の葉っぱ色 */
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.detail-card h3 {
+    font-size: 28px;
+    /* 特大サイズ */
+    color: #5d9a21;
+    text-align: center;
+}
+
+.close {
+    float: right;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.btn-main {
+    display: block;
+    padding: 8px 6px;
+    margin: 10px auto 0;
+    background: #55bbbf;
+    /* あつ森のメインUI色（青緑） */
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
 }
 
 select,
@@ -435,6 +557,41 @@ textarea {
     border: none;
     cursor: pointer;
     font-weight: bold;
+}
+
+.action-item {
+    width: 110px;
+    height: 110px;
+    background: #fff;
+    border: 3px solid #8ac060;
+    /* 優しいオフホワイトの枠 */
+    border-radius: 10px;
+    /* 角丸でぷっくり */
+
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #7e6340;
+    box-shadow: 0 2px 0 #e0e0d0;
+    /* ベタ塗りの影（あつ森風） */
+    transition: transform 0.1s, box-shadow 0.1s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* タップした時に凹む演出 */
+.action-item:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #e0e0d0;
+}
+
+.action-item img {
+    width: 100px;
+    height: auto;
+
 }
 
 /* 5. 検索・ソートエリアの固定表示調整 */
@@ -727,7 +884,6 @@ textarea {
 .avatar-grid img {
     width: 100%;
     aspect-ratio: 1/1;
-    border-radius: 50%;
     cursor: pointer;
     border: 3px solid transparent;
     transition: 0.2s;
@@ -735,6 +891,7 @@ textarea {
 
 .avatar-grid img:hover {
     border-color: var(--primary);
+    border-radius: 50%;
     transform: scale(1.1);
 }
 
@@ -742,14 +899,12 @@ textarea {
 .user-avatar img {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     background: #fdfdfd;
     border: 1px solid #eee;
 }
 
 /* 選択中のアイコン表示 */
 .selected-avatar-display img {
-    border-radius: 50%;
     vertical-align: middle;
 }
 

@@ -142,7 +142,7 @@ function renderPosts() {
             ${post.image ? `<div class="post-attached-image"><img src="${post.image}" onclick="window.open(this.src)"></div>` : ''}
             
             <div class="post-actions">
-                <button class="action-item" onclick="addThank(${post.id})">✨ 役に立った (${post.thanks || 0})</button>
+                <button  class="stamp-btn" onclick="addThank(${post.id})">✨ 役に立った (${post.thanks || 0})</button>
                 <div class="stamp-container">
                     ${STAMP_TYPES.map(s => `
                         <button class="stamp-btn" onclick="addStamp(${post.id}, '${s.id}')">
